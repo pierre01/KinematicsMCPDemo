@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="KinematicsDemo.ViewModels.RobotArmViewModel">
+    <Position X="0.5" Y="1" Width="3" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <AssociationLine Name="UpperArmSegment" Type="KinematicsDemo.Models.Segment">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.839" Y="0.081" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="ForearmSegment" Type="KinematicsDemo.Models.Segment">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.86" Y="0.101" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="EffectorSegment" Type="KinematicsDemo.Models.Segment">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.995" Y="0.081" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>FiEQAAIigQhYxSKwEoBAwkAAQMECKhCCghYBgwCZkwA=</HashCode>
+      <FileName>ViewModels\RobotArmViewModel.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="UpperArmSegment" />
+      <Property Name="ForearmSegment" />
+      <Property Name="EffectorSegment" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="KinematicsDemo.Models.Segment">
+    <Position X="6.5" Y="1" Width="2.25" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAQAgCAEAAAAgoAAAQEAAABAEQMCAAAAAAAAAAAAAAE=</HashCode>
+      <FileName>Models\Segment.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="KinematicsDemo.ViewModels.TeachPendantViewModel">
+    <Position X="10.5" Y="1.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>EQAAgAgIACQICQAwAAAAxAAAAEABIAAAhAAACAgAIRA=</HashCode>
+      <FileName>ViewModels\TeachPendantViewModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

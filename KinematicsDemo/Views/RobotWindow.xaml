@@ -1,0 +1,563 @@
+﻿<Window
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="http://schemas.microsoft.com/netfx/2009/xaml/presentation"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:KinematicsDemo.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:skia="clr-namespace:SkiaSharp.Views.WPF;assembly=SkiaSharp.Views.WPF"
+    xmlns:viewmodels="clr-namespace:KinematicsDemo.ViewModels"
+    xmlns:UserControls="clr-namespace:KinematicsDemo.UserControls" x:Name="window"
+    x:Class="KinematicsDemo.Views.RobotWindow"
+    Title="{Binding LoadedRobotActionName, StringFormat=Robot window - \{0\}}"
+    Width="1400"
+    Height="1073"
+    d:DataContext="{d:DesignInstance {x:Type viewmodels:RobotArmViewModel}}"
+    Icon="/AppIcon.ico"
+    mc:Ignorable="d">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="boolConv" />
+    </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding
+            Key="A"
+            Command="{Binding AddPointCommand}"
+            Modifiers="Control" />
+    </Window.InputBindings>
+    <Grid>
+        <Canvas x:Name="WorkCellCanvas" ClipToBounds="False">
+            <Grid x:Name="WorkCellGrid" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Center" Height="739" Canvas.Left="-150" Canvas.Top="-51" VerticalAlignment="Top">
+                <Grid.RenderTransform>
+                    <TransformGroup>
+                        <SkewTransform/>
+                        <RotateTransform/>
+                        <TranslateTransform X="{Binding ArmRailPosition}"/>
+                    </TransformGroup>
+                </Grid.RenderTransform>
+                <Rectangle
+                    x:Name="RailRectangle"
+                    StrokeDashArray="4 4"
+                    Width="1370"
+                    Height="80"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top" RadiusX="16" RadiusY="16" Fill="{DynamicResource Primary100Brush}" Stroke="Black" StrokeThickness="2" Panel.ZIndex="-10" Margin="0,398,0,0" />
+                <Rectangle
+                    Width="192"
+                    Height="144"
+                    IsHitTestVisible="False"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Fill="#68A44949"
+                    Stroke="Black"  Margin="934,595,0,0" />
+
+                <Rectangle HorizontalAlignment="Left" Height="100" Margin="257,95,0,0" Stroke="Black" VerticalAlignment="Top" Width="100" Fill="#FF66DE07"/>
+            </Grid>
+            <Canvas
+                x:Name="RobotArmCanvas"
+                Canvas.Left="250"
+                Canvas.Top="332"
+                ClipToBounds="False"
+                IsHitTestVisible="True" Panel.ZIndex="1">
+                <Rectangle
+                    Canvas.Left="-52.82"
+                    Canvas.Top="-72.599"
+                    Width="156"
+                    Height="250"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Center"
+                    Fill="#FFA4B6C0"
+                    RadiusX="15.5"
+                    RadiusY="15.5"
+                    Stroke="Black" Opacity="0.999" />
+                <Canvas
+                    x:Name="UpperArmCanvas"
+                    Canvas.Left="23.846"
+                    Canvas.Top="-237.123"
+                    Width="298"
+                    Height="577"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    RenderTransformOrigin="0.235,0.495">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform />
+                            <SkewTransform />
+                            <RotateTransform Angle="{Binding UpperArmSegment.RelativeAngle}" />
+                            <TranslateTransform />
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+                    <Canvas
+                        x:Name="ForeArmCanvas"
+                        Canvas.Left="228.863"
+                        Canvas.Top="44"
+                        Width="286"
+                        Height="500"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        RenderTransformOrigin="0.228,0.486">
+                        <Canvas.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform />
+                                <SkewTransform />
+                                <RotateTransform Angle="{Binding ForearmSegment.RelativeAngle}" />
+                                <TranslateTransform />
+                            </TransformGroup>
+                        </Canvas.RenderTransform>
+
+                        <Canvas
+                            x:Name="GripperCanvas"
+                            Canvas.Left="205.612"
+                            Canvas.Top="236.864"
+                            Width="222"
+                            Height="25"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            RenderTransformOrigin="0.341,0.467">
+                            <Canvas.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform />
+                                    <SkewTransform />
+                                    <RotateTransform Angle="{Binding EffectorSegment.RelativeAngle}" />
+                                    <TranslateTransform />
+                                </TransformGroup>
+                            </Canvas.RenderTransform>
+
+                            <Path
+                                x:Name="Gripper"
+                                Width="155"
+                                Height="182"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                Data="M14.4375,0.3525 L33.5,0.5 35.5,15.5 45.5,15.5 C47.709141,15.5 49.5,17.290861 49.5,19.5 L49.5,26.5 C49.5,28.709139 47.709141,30.5 45.5,30.5 L39.5,30.5 39.5,58.5 37.5,58.5 37.5,49.79 36.25,49.04 37.5,47.415 37.5,30.5 9.5000002,30.5 9.5000002,46.915 11,49.04 9.5000002,49.54 9.5000002,58.5 7.5000002,58.5 7.5000002,30.5 4.5000002,30.5 C2.2908608,30.5 0.49999988,28.709139 0.5,26.5 L0.5,19.5 C0.49999988,17.290861 2.2908608,15.5 4.5000002,15.5 6.8333335,15.5 12.166667,15.5 12.5,15.5 z"
+                                Fill="#a0bfd5"
+                                RenderTransformOrigin="0.50,0.04"
+                                Stretch="Fill"
+                                Stroke="Black">
+                                <Path.RenderTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform ScaleX="1" ScaleY="1" />
+                                        <SkewTransform />
+                                        <RotateTransform Angle="-90.356" />
+                                    </TransformGroup>
+                                </Path.RenderTransform>
+                            </Path>
+                            <Ellipse
+                                x:Name="EffectorGrabEllipse"
+                                Canvas.Left="216"
+                                Canvas.Top="4"
+                                Width="8"
+                                Height="8"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Top"
+                                RenderTransformOrigin="0.5,0.568"
+                                Stroke="Black" />
+                        </Canvas>
+
+                        <Path
+                            x:Name="Forearm"
+                            Width="124"
+                            Height="281"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Data="M4.7498887,20.105543 C5.978701,10.981119 9.2360485,3.4964625 17.796462,3.4964625 L20.059731,3.5996266 C28.620145,3.5996266 30.01507,12.304684 31.262222,18.495918 L36.952768,77.872878 C36.952768,86.433292 32.560414,93.5 24,93.5 L13.37596,93.493513 C4.8155466,93.493513 -2.0169528,85.917421 -2.0169528,77.357007 z"
+                            Fill="#849daf"
+                            RenderTransformOrigin="0.53,0.852"
+                            Stretch="Fill"
+                            Stroke="Black">
+                            <Path.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform />
+                                    <SkewTransform />
+                                    <RotateTransform Angle="90" />
+                                    <TranslateTransform X="7.868" Y="7.868" />
+                                </TransformGroup>
+                            </Path.RenderTransform>
+                        </Path>
+                        <Ellipse
+                            x:Name="WristJointEllipse"
+                            Canvas.Left="274"
+                            Canvas.Top="240"
+                            Width="8"
+                            Height="8"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            RenderTransformOrigin="0.5,0.568"
+                            Stroke="Black" />
+                    </Canvas>
+                    <Path
+                        x:Name="UpperArm"
+                        Width="114"
+                        Height="311"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Data="M3.2436781,16 C3.2436781,7.4395864 17.939586,0.5 26.5,0.5 L90.092465,0.5 C98.652879,0.5 116.10089,7.4395864 116.10089,16 L121.78972,317 C121.78972,325.56041 102.56041,332.5 94,332.5 L16,332.5 C7.4395864,332.5 -5.5300781,325.56041 -5.5300781,317 z"
+                        Fill="#738896"
+                        RenderTransformOrigin="0.50,0.878"
+                        Stretch="Fill"
+                        Stroke="Black">
+                        <Path.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform />
+                                <SkewTransform />
+                                <RotateTransform Angle="90" />
+                                <TranslateTransform X="11.185" Y="13.073" />
+                            </TransformGroup>
+                        </Path.RenderTransform>
+                    </Path>
+                    <Ellipse
+                        x:Name="ElbowJointEllipse"
+                        Canvas.Left="290.154"
+                        Canvas.Top="281.123"
+                        Width="8"
+                        Height="8"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        RenderTransformOrigin="0.5,0.568"
+                        Stroke="Black" />
+                </Canvas>
+                <Path
+                    x:Name="Shoulder"
+                    Canvas.Left="-0.726"
+                    Canvas.Top="-14.495"
+                    Width="118"
+                    Height="127"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Data="M0.5,16 C0.5,7.4395864 5.6005016,1.0575768 14.160915,1.0575768 L23.509802,0.77420848 C32.070216,0.77420848 37.01748,7.1242212 37.01748,15.684635 L37.013158,23.501693 C37.013158,32.062106 37.103741,39.135808 36.859917,39.135808 L0.75,39.585291 C0.583796,39.130582 0.5,32.560414 0.5,24 z"
+                    Fill="#4b5963"
+                    RenderTransformOrigin="0.5,0.5"
+                    Stretch="Fill"
+                    Stroke="Black">
+                    <Path.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="1" ScaleY="1" />
+                            <SkewTransform />
+                            <RotateTransform Angle="90.783" />
+                            <TranslateTransform />
+                        </TransformGroup>
+                    </Path.RenderTransform>
+                </Path>
+                <Ellipse
+                    x:Name="ShoulderJointEllipse"
+                    Canvas.Left="90"
+                    Canvas.Top="44"
+                    Width="8"
+                    Height="8"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    RenderTransformOrigin="0.5,0.583"
+                    Stroke="Black" />
+                <skia:SKElement
+                    x:Name="SKSurface"
+                    Canvas.Left="-244"
+                    Canvas.Top="-348"
+                    Width="1370"
+                    Height="800"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    IgnorePixelScaling="True"
+                    MouseDown="SKSurface_MouseDown"
+                    PaintSurface="DrawSegments" 
+                    Panel.ZIndex="10" />
+            </Canvas>
+        </Canvas>
+
+        <!--
+            IgnorePixelScaling: By default, when false,
+            the canvas is resized to 1 canvas pixel per display pixel.
+            When true, the canvas is resized to device independent pixels,
+            and then stretched to fill the view. Although performance is improved
+            and all objects are the same size on different display densities,
+            blurring and pixelation may occur.
+        -->
+        <Border
+            x:Name="ControlPanel"
+            Margin="0,10,10,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Background="White"
+            BorderBrush="Black"
+            BorderThickness="1,1,1,1"
+            CornerRadius="8,8,8,8">
+            <StackPanel Width="299" Orientation="Vertical">
+                <StackPanel Margin="8" Orientation="Horizontal">
+                    <TextBlock
+                        Width="72"
+                        Margin="4"
+                        VerticalAlignment="Center"
+                        Text="Shoulder:" />
+                    <RepeatButton
+                        Width="28"
+                        Height="20"
+                        Margin="0,0,10,0"
+                        Command="{Binding ShoulderRotateCommand}"
+                        CommandParameter="-1"
+                        Content=" - " />
+                    <RepeatButton
+                        Width="28"
+                        Height="20"
+                        Command="{Binding ShoulderRotateCommand}"
+                        CommandParameter="1"
+                        Content=" + " />
+                    <TextBlock
+                        x:Name="ShoulderAngleText"
+                        Width="72"
+                        Margin="4"
+                        VerticalAlignment="Center"
+                        Text="{Binding UpperArmSegment.RelativeAngle, StringFormat=\{0:+0.000;-0.000\}°}" />
+                    <ToggleButton
+                        x:Name="ShoulderLockButton"
+                        Width="48"
+                        Margin="8,0,0,0"
+                        Content="Lock"
+                        IsChecked="{Binding IsShoulderLocked, Mode=TwoWay}"
+                        Style="{DynamicResource MenuToggleButtonStyle}" />
+                </StackPanel>
+                <StackPanel Margin="8" Orientation="Horizontal">
+                    <TextBlock
+                        Width="72"
+                        Margin="4"
+                        VerticalAlignment="Center"
+                        Text="Elbow:" />
+                    <RepeatButton
+                        Width="28"
+                        Height="20"
+                        Margin="0,0,10,0"
+                        Command="{Binding ElbowRotateCommand}"
+                        CommandParameter="-1"
+                        Content=" - " />
+                    <RepeatButton
+                        Width="28"
+                        Height="20"
+                        Command="{Binding ElbowRotateCommand}"
+                        CommandParameter="1"
+                        Content=" + " />
+                    <TextBlock
+                        x:Name="ElbowAngleText"
+                        Width="72"
+                        Margin="4"
+                        VerticalAlignment="Center"
+                        Text="{Binding ForearmSegment.RelativeAngle, StringFormat=\{0:+0.000;-0.000\}°}" />
+                    <ToggleButton
+                        x:Name="ElbowLockButton"
+                        Width="48"
+                        Margin="8,0,0,0"
+                        Content="Lock"
+                        IsChecked="{Binding IsElbowLocked, Mode=TwoWay}"
+                        Style="{DynamicResource MenuToggleButtonStyle}" />
+                </StackPanel>
+
+                <StackPanel Margin="8" Orientation="Horizontal">
+                    <TextBlock
+                        Width="72"
+                        Margin="4"
+                        VerticalAlignment="Center"
+                        Text="Wrist:" />
+                    <RepeatButton
+                        Width="28"
+                        Height="20"
+                        Margin="0,0,10,0"
+                        Command="{Binding WristRotateCommand}"
+                        CommandParameter="-1"
+                        Content=" - " />
+                    <RepeatButton
+                        Width="28"
+                        Height="20"
+                        Command="{Binding WristRotateCommand}"
+                        CommandParameter="1"
+                        Content=" + " />
+                    <TextBlock
+                        x:Name="WristAngleText"
+                        Width="72"
+                        Margin="4"
+                        VerticalAlignment="Center"
+                        Text="{Binding EffectorSegment.RelativeAngle, StringFormat=\{0:+0.000;-0.000\}°}" />
+                    <ToggleButton
+                        x:Name="WristLockButton"
+                        Width="48"
+                        Margin="8,0,0,0"
+                        Content="Lock"
+                        IsChecked="{Binding IsWristLocked, Mode=TwoWay}"
+                        Style="{DynamicResource MenuToggleButtonStyle}" />
+                </StackPanel>
+                <StackPanel Margin="8" Orientation="Horizontal">
+                    <TextBlock
+                        Width="150"
+                        Margin="4,4,4,4"
+                        VerticalAlignment="Center"
+                        Text="Effector Grip:" />
+                    <ToggleButton
+                        x:Name="EffectorGripButton"
+                        Width="48"
+                        Margin="8,0,5,0"
+                        Command="{Binding EffectorGripCommand}"
+                        Content="Grip"
+                        Style="{DynamicResource MenuToggleButtonStyle}" />
+                    <ToggleButton
+                        x:Name="EffectorLockButton"
+                        Width="48"
+                        Margin="16,0,8,0"
+                        Content="Lock"
+                        IsChecked="{Binding IsEffectorLocked}"
+                        Style="{DynamicResource MenuToggleButtonStyle}" />
+                </StackPanel>
+                <TextBlock
+                    x:Name="MousePosTextBlock"
+                    Margin="8"
+                    TextTrimming="CharacterEllipsis" />
+                <TextBlock x:Name="GripPosTextBlock" Margin="8" />
+
+                <Button
+                    Width="281"
+                    Margin="8"
+                    Command="{Binding AddPointCommand}">
+                    <Button.Triggers>
+                        <EventTrigger RoutedEvent="ButtonBase.Click">
+                            <BeginStoryboard>
+                                <Storyboard x:Name="RecordClickStoryboard">
+                                    <DoubleAnimation
+                                        AutoReverse="True"
+                                        Storyboard.TargetName="RecordingDot"
+                                        Storyboard.TargetProperty="Opacity"
+                                        From="0"
+                                        To="1"
+                                        Duration="0:0:0.5">
+                                        <DoubleAnimation.EasingFunction>
+                                            <CubicEase EasingMode="EaseIn" />
+                                        </DoubleAnimation.EasingFunction>
+                                    </DoubleAnimation>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </Button.Triggers>
+                    <Grid Width="250">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="22" />
+                        </Grid.ColumnDefinitions>
+                        <Label
+                            HorizontalAlignment="Center"
+                            Content="_Add Position to Recording"
+                            Foreground="{DynamicResource Primary900Brush}" />
+                        <Ellipse
+                            Grid.Column="1"
+                            Width="14"
+                            Height="14"
+                            Fill="{StaticResource StaticGray300Brush}"
+                            Stroke="{DynamicResource StaticGray600Brush}" />
+                        <Ellipse
+                            x:Name="RecordingDot"
+                            Grid.Column="1"
+                            Width="14"
+                            Height="14"
+                            Fill="Red"
+                            Opacity="0"
+                            Stroke="{DynamicResource StaticGray600Brush}" />
+                    </Grid>
+                </Button>
+
+
+                <Button
+                    Margin="8"
+                    Command="{Binding ClearRecordingCommand}"
+                    Content="Clear Recorded Positions" />
+                <ToggleButton
+                    Height="32"
+                    Margin="8"
+                    Command="{Binding EditCommand}"
+                    IsEnabled="False"
+                    Style="{DynamicResource MenuToggleButtonStyle}">
+                    <Grid Width="220">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="22" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock HorizontalAlignment="Center" Text="Edit" />
+                        <Ellipse
+                            Grid.Column="1"
+                            Width="14"
+                            Height="14"
+                            Fill="Gray" />
+                    </Grid>
+                </ToggleButton>
+                <StackPanel Margin="6,8,0,8" Orientation="Horizontal" HorizontalAlignment="Stretch">
+                    <Button Margin="4" Width="160"
+                    Command="{Binding PlayCommand}"
+                        Content="Play Recording" />
+                    <CheckBox
+                        Margin="4,0,0,0"
+                        ToolTip="Play Recording by moving joints instead of folowing the line between 2 points"
+                        Content="Move joints"
+                        VerticalAlignment="Center"
+                        IsChecked="{Binding IsMovingOnJointsDelta, Mode=TwoWay}" />
+                </StackPanel>
+                <Border
+                    Margin="4,0,4,0"
+                    Panel.ZIndex="-5"
+                    BorderBrush="{DynamicResource StaticGray800Brush}"
+                    BorderThickness="1,1,1,1"
+                    CornerRadius="2,2,2,2">
+                    <StackPanel Orientation="Vertical">
+
+
+                        <TextBlock
+                            Margin="4,4,4,0"
+                            Foreground="{DynamicResource StaticGray600Brush}"
+                            Text="Action Name:" />
+                        <TextBox Margin="4" Text="{Binding LoadedRobotActionName, Mode=TwoWay}" />
+                        <TextBlock
+                            Margin="4,4,4,0"
+                            Foreground="{DynamicResource StaticGray600Brush}"
+                            Text="Action Description:" />
+                        <TextBox Margin="4" Text="{Binding LoadedRobotActionDescription, Mode=TwoWay}" />
+                        <StackPanel Orientation="Horizontal">
+                            <Button
+                                Width="136"
+                                Margin="4"
+                                Command="{Binding SaveRecordingCommand}"
+                                Content="Save Recording" />
+                            <Button
+                                Width="136"
+                                Margin="0,4,4,4"
+                                Command="{Binding LoadRecordingCommand}"
+                                Content="Load recording" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                <TextBlock
+                    x:Name="TranslateTextBlock"
+                    Margin="8"
+                    Text="" />
+                <CheckBox
+                    Margin="8"
+                    Content="Show Kinematics drawing"
+                    Foreground="{DynamicResource Primary900Brush}"
+                    IsChecked="{Binding IsShowingDetails, Mode=TwoWay}" />
+                <Border
+                    Margin="4,0,4,0"
+                    Panel.ZIndex="-5"
+                    BorderBrush="{DynamicResource StaticGray800Brush}"
+                    BorderThickness="1,1,1,1"
+                    CornerRadius="2,2,2,2">
+                    <Grid   >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Label
+						Content="Teach Pendant"
+						Foreground="{DynamicResource StaticGray600Brush}"
+						HorizontalAlignment="Center"
+						Margin="4,4,4,4" />
+                        <Button
+							Content="Show Pendant"
+							Command="{Binding ShowTeachPendantCommand}"
+							Grid.Row="1"
+							Margin="4" />
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </Border>
+        <UserControls:HeightIndicator x:Name="RobotHeightIndicator" HorizontalAlignment="Left" Margin="0,664,0,0" VerticalAlignment="Top"  Width="457"  ArmHeight="{Binding ArmHeightPosition,Mode=OneWay}" Height="351" MaxArmHeight="{Binding ArmMaxHeightPosition}" />
+    </Grid>
+</Window>

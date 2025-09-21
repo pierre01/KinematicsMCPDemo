@@ -1,0 +1,14 @@
+﻿<Application x:Class="KinematicsDemo.App" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="clr-namespace:KinematicsDemo">
+	<Application.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="/Styles/IconsDictionary.xaml" />
+				<ResourceDictionary Source="/Styles/ColorsAndFontsDictionary.xaml" />
+				<ResourceDictionary Source="/Styles/BasicControlsDictionary.xaml" />
+				<!--<ResourceDictionary Source="/Styles/ExpanderDictionary.xaml" />
+                <ResourceDictionary Source="/Styles/CalendarAndTimeDictionary.xaml" />
+                <ResourceDictionary Source="/Styles/TabControlDictionary.xaml" />-->
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</Application.Resources>
+</Application>

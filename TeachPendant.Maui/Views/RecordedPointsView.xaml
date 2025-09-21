@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:Biosero.TeachPendant.Maui.ViewModels"
+    x:Class="Biosero.TeachPendant.Maui.Views.RecordedPointsView"
+    Title="Recorded Points">
+    <VerticalStackLayout>
+        <ListView ItemsSource="{Binding RecordedPoints}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <StackLayout Orientation="Horizontal">
+                            <Label
+                                Text="X:" 
+                                Margin="15,0,5,0"
+                                VerticalOptions="Center"/>
+                            <Label 
+                                Text="{Binding X}" 
+                                Margin="0,0,15,0"
+                                VerticalOptions="Center"/>
+                            <Label 
+                                Text="Y: " 
+                                Margin="5,0,5,0"
+                                VerticalOptions="Center"/>
+                            <Label 
+                                Text="{Binding Y}" 
+                                Margin="0,0,15,0"
+                                VerticalOptions="Center"/>
+                            <Label 
+                                Text="Z: " 
+                                Margin="5,0,5,0"
+                                VerticalOptions="Center"/>
+                            <Label 
+                                Text="{Binding Z}" 
+                                Margin="0,0,15,0"
+                                VerticalOptions="Center"/>
+                            <Label 
+                                Text="Rail: " 
+                                Margin="5,0,5,0" 
+                                VerticalOptions="Center"/>
+                            <Label 
+                                Text="{Binding Rail}" 
+                                Margin="0,0,15,0"
+                                VerticalOptions="Center"/>
+                        </StackLayout>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </VerticalStackLayout>
+</ContentPage>
