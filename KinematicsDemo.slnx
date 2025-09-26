@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="KinematicsDemo/KinematicsDemo.csproj" />
+  <Project Path="KinematicsDemoTests/KinematicsDemoTests.csproj" />
+  <Project Path="RobotMcpClient/RobotMcpClient.csproj" />
+  <Project Path="TeachPendant.Common/Biosero.TeachPendant.Common.csproj" />
+</Solution>

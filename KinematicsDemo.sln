@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.4.33213.308
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11012.119 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KinematicsDemo", "KinematicsDemo\KinematicsDemo.csproj", "{F72D2C43-2EC5-4887-8D27-E860A4E7C87C}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KinematicsDemoTests", "KinematicsDemoTests\KinematicsDemoTests.csproj", "{CA0F566D-71DE-4039-82E4-957B1AB0C943}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Biosero.TeachPendant.Common", "TeachPendant.Common\Biosero.TeachPendant.Common.csproj", "{1066A59B-D236-48EE-9FFB-95C2872B49E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RobotMcpClient", "RobotMcpClient\RobotMcpClient.csproj", "{B3B98CE5-AD58-4AB4-A687-CD39A368F463}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{1066A59B-D236-48EE-9FFB-95C2872B49E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1066A59B-D236-48EE-9FFB-95C2872B49E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1066A59B-D236-48EE-9FFB-95C2872B49E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3B98CE5-AD58-4AB4-A687-CD39A368F463}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3B98CE5-AD58-4AB4-A687-CD39A368F463}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3B98CE5-AD58-4AB4-A687-CD39A368F463}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3B98CE5-AD58-4AB4-A687-CD39A368F463}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
