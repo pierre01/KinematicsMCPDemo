@@ -43,8 +43,7 @@ public partial class App : Application
         services.AddTransient<IFileDialogService, FileDialog>();
         services.AddSingleton<IMessageBoxService, MessageBoxService>();
         services.AddSingleton<IToolWindowService, ToolWindowService>();
-        services.AddSingleton<IWebServerCommandParser, WebServerCommandParser>();
-        services.AddSingleton<IWebServerService, WebServerService>();
+        services.AddSingleton<IWebServerService, McpService>();
 
         return services.BuildServiceProvider();
     }

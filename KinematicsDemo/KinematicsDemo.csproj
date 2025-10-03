@@ -29,7 +29,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TeachPendant.Common\Biosero.TeachPendant.Common.csproj" />
+    <ProjectReference Include="..\Biosero.Kinematics.Common\Biosero.Kinematics.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="AppIcon.ico" />

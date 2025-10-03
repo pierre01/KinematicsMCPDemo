@@ -17,7 +17,6 @@ namespace KinematicsDemo.ViewModels
     /// </summary>
     public partial class TeachPendantViewModel : ObservableObject
     {
-        private readonly IWebServerCommandParser _webServerCommandParser;
         private readonly IWebServerService _webServerService;
         private RobotArmViewModel _robotViewModel;
 
@@ -27,7 +26,6 @@ namespace KinematicsDemo.ViewModels
         /// <param name="robotViewModel">ViewModel </param>
         public TeachPendantViewModel(RobotArmViewModel robotViewModel)
         {
-            _webServerCommandParser = App.Current.Services.GetRequiredService<IWebServerCommandParser>();
             _webServerService = App.Current.Services.GetRequiredService<IWebServerService>();
 
             _robotViewModel = robotViewModel;
@@ -36,8 +34,6 @@ namespace KinematicsDemo.ViewModels
             _z = _robotViewModel.ArmHeightPosition;
             _railPosition = _robotViewModel.ArmRailPosition;
 
-            WeakReferenceMessenger.Default.Register<WebServerRequestMessage>(this, (r, m)
-                => _webServerCommandParser.ParseCommand(this, m.Value));
         }
 
         [ObservableProperty]
