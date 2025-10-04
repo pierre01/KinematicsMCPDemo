@@ -1,9 +1,9 @@
-﻿using Lights.MauiClient.Services.Interfaces;
-using CommunityToolkit.Maui.Alerts;
+﻿using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
+using RobotMcpClient.Services.Interfaces;
 
 
-namespace Lights.MauiClient.Services;
+namespace RobotMcpClient.Services;
 
 public class DialogService : IDialogService
 {

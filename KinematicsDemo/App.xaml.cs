@@ -81,6 +81,7 @@ public partial class App : Application
             RobotArmViewModel robotArmViewModel = new RobotArmViewModel(
                 0, heightRange, upperArmSegment, forearmSegment, effectorSegment, messageBoxService, fileDialogService, toastService, toolWindowService);
             MainWindow = new RobotWindow(robotArmViewModel);
+            RobotMcpTool.Robot = robotArmViewModel;
         }
 
         // Display the main window

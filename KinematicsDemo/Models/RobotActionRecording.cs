@@ -17,8 +17,8 @@ public partial class RobotActionRecording:ObservableObject
 
     public RobotActionRecording(string name, string description)
     {
-        _name = name;
-        _description = description;
+        Name = name;
+        Description = description;
     }
 
     public RobotActionRecording()
@@ -27,13 +27,13 @@ public partial class RobotActionRecording:ObservableObject
     }
 
     [ObservableProperty]
-    string? _name;
+    public partial string? Name{ get;set;}
 
     [ObservableProperty]
-    string? _description;
+    public partial string? Description { get;set; }
 
     [ObservableProperty]
-    ObservableCollection<MetaPoint> _points = new ObservableCollection<MetaPoint>();
+    public partial ObservableCollection<MetaPoint> Points { get;set;} = new ObservableCollection<MetaPoint>();
 
     public void Add(MetaPoint metaPoint)
     {

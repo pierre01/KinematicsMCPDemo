@@ -117,20 +117,13 @@ namespace KinematicsDemo.ViewModels
             else
             {
                 RemoteModeTooltip = "Start Mobile Server";
-                _webServerService.Stop();
+                await _webServerService.StopAsync();
             }
         }
 
         [ObservableProperty]
-        private string _remoteModeTooltip = "Start Mobile Server";
+        public partial string RemoteModeTooltip { get; set; } = "Start Mobile Server";
 
-
-        private void UpdateAndRefresh(Point m)
-        {
-            _robotViewModel.MousePoint = m;
-            _robotViewModel.LastSurfacePoint = m;
-            _robotViewModel.RefreshDrawing();
-        }
 
         /// <summary>
         /// Record the current point
@@ -178,7 +171,6 @@ namespace KinematicsDemo.ViewModels
             m.Y -= StepPrecision;
             Y = m.Y;
             UpdateAndRefresh(m);
-
         }
 
         /// <summary>
@@ -263,6 +255,14 @@ namespace KinematicsDemo.ViewModels
                 _robotViewModel.GoBackwardCommand.Execute(StepPrecision);
                 RailPosition = _robotViewModel.ArmRailPosition;
             }
+        }        
+        
+        private void UpdateAndRefresh(Point m)
+        {
+            _robotViewModel.MousePoint = m;
+            _robotViewModel.LastSurfacePoint = m;
+            _robotViewModel.RefreshDrawing();
         }
+
     }
 }

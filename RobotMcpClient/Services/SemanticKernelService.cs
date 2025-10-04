@@ -1,11 +1,11 @@
-﻿using Lights.MauiClient.Services.Interfaces;
-using Microsoft.SemanticKernel;
+﻿using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using ModelContextProtocol.SemanticKernel.Extensions;
+using RobotMcpClient.Services.Interfaces;
 using System.Diagnostics;
 
-namespace Lights.MauiClient.Services;
+namespace RobotMcpClient.Services;
 
 public class SemanticKernelService : ISemanticKernelService
 {
@@ -13,13 +13,8 @@ public class SemanticKernelService : ISemanticKernelService
     private const string chatModel = "gpt-5-nano";
 
     // ===== MCP transport config (override via env vars) =====
-    // MCP_MODE: "STDIO" (default) or "WS"
-    // MCP_EXE:  full path to Lights.McpServer.exe (when STDIO)
     // MCP_WS_URL: ws://localhost:5059/mcp (when WS)
-    private static readonly string McpMode = Environment.GetEnvironmentVariable("MCP_MODE") ?? "SSE"; // SSE Or STDIO
-    private static readonly string McpExe = Environment.GetEnvironmentVariable("MCP_EXE")
-                                            ?? @"G:\Dev\AI\AIKernelClient\Lights.McpServer\bin\Debug\net9.0\Lights.McpServer.exe";
-    private static readonly string McpWsUrl = Environment.GetEnvironmentVariable("MCP_WS_URL") ?? "https://localhost:3001/mcp/";  //"ws://localhost:3001/mcp/"
+    private static readonly string McpWsUrl = Environment.GetEnvironmentVariable("MCP_WS_URL") ?? "https://localhost:6805/mcp/";  //"ws://localhost:6805/mcp/"
 
     private ChatHistory _history;
     private IKernelBuilder _builder;
@@ -56,10 +51,8 @@ public class SemanticKernelService : ISemanticKernelService
                 modelId: chatModel,
                 apiKey: openAiApiKey,
                 orgId: openApiOrgId,
-                serviceId: "lights"
+                serviceId: "Kinematics"
             );
-
-
 
             // Let the model auto-invoke MCP tools when helpful
 #pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
@@ -75,32 +68,19 @@ public class SemanticKernelService : ISemanticKernelService
 
             _kernel = _builder.Build();
 
+            ////////////////////////////////////////////
+            // =====    Attach MCP tools          =====
 
-            // ===== Attach MCP tools (choose transport by env) =====
-            if (string.Equals(McpMode, "SSE", StringComparison.OrdinalIgnoreCase))
-            {
-                // Default: start the MCP server locally via SSE and bind its tools
-                // Connect to a running http  server 
-                await _kernel.Plugins.AddMcpFunctionsFromSseServerAsync(
-                    serverName: "Lights.McpServer",
-                     endpoint: McpWsUrl);
-            }
-            else
-            {
-                // Not Supported anymore I switched to SSE by default
-                var p = await _kernel.Plugins.AddMcpFunctionsFromStdioServerAsync(
-                    serverName: "Lights.McpServer",
-                    command: McpExe,
-                    arguments: Array.Empty<string>());
-            }
+            // Default: start the MCP server locally via SSE and bind its tools
+            // Connect to a running http  server 
+            await _kernel.Plugins.AddMcpFunctionsFromSseServerAsync(
+                serverName: "Kinematics.McpServer",
+                    endpoint: McpWsUrl);
 
             // Optional: inspect/trace tool invocations
             _kernel.FunctionInvocationFilters.Add(new FunctionInvocationFilter());
 
-
-
             _chatCompletionService = _kernel.GetRequiredService<IChatCompletionService>();
-
 
         }
         catch (Exception ex)
@@ -175,7 +155,7 @@ public class SemanticKernelService : ISemanticKernelService
 /// </summary>
 public sealed class FunctionInvocationFilter : IFunctionInvocationFilter
 {
-    public async Task OnFunctionInvocationAsync(Microsoft.SemanticKernel.FunctionInvocationContext context, Func<Microsoft.SemanticKernel.FunctionInvocationContext, Task> next)
+    public async Task OnFunctionInvocationAsync(FunctionInvocationContext context, Func<FunctionInvocationContext, Task> next)
     {
         try
         {
@@ -190,6 +170,5 @@ public sealed class FunctionInvocationFilter : IFunctionInvocationFilter
         }
 
     }
-
 
 }

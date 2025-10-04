@@ -1,24 +1,17 @@
-﻿namespace RobotMcpClient
+﻿using RobotMcpClient.ViewModels;
+
+namespace RobotMcpClient
 {
     public partial class MainPage : ContentPage
     {
-        int count = 0;
+        private MainPageViewModel _viewModel;
 
-        public MainPage()
+
+        public MainPage(MainPageViewModel viewModel)
         {
+            _viewModel = viewModel;
+            BindingContext = _viewModel;
             InitializeComponent();
-        }
-
-        private void OnCounterClicked(object? sender, EventArgs e)
-        {
-            count++;
-
-            if (count == 1)
-                CounterBtn.Text = $"Clicked {count} time";
-            else
-                CounterBtn.Text = $"Clicked {count} times";
-
-            SemanticScreenReader.Announce(CounterBtn.Text);
         }
     }
 }

@@ -21,7 +21,7 @@
       </MemberNameLabel>
     </AssociationLine>
     <TypeIdentifier>
-      <HashCode>FiEQAAIigQhYxSKwEoBAwkAAQMECKhCCghYBgwCZkwA=</HashCode>
+      <HashCode>ECEQAAIiEahcdQLwGolCwkAAQMUENUCCoxMBQgCZEYA=</HashCode>
       <FileName>ViewModels\RobotArmViewModel.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -41,9 +41,9 @@
     </TypeIdentifier>
   </Class>
   <Class Name="KinematicsDemo.ViewModels.TeachPendantViewModel">
-    <Position X="10.5" Y="1.5" Width="2.75" />
+    <Position X="9.75" Y="1" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>EQAAgAgIACQICQAwAAAAxAAAAEABIAAAhAAACAgAIRA=</HashCode>
+      <HashCode>EQAAgAgIADQICQAwAAAAxAAAAEABIAAAhAAACCgAIRA=</HashCode>
       <FileName>ViewModels\TeachPendantViewModel.cs</FileName>
     </TypeIdentifier>
   </Class>

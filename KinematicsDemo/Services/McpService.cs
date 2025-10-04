@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Biosero.Kinematics.Common.Serialization;
@@ -8,30 +9,34 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KinematicsDemo.Services
 {
-    public class McpService : IWebServerService
+    public class McpService : IWebServerService, IAsyncDisposable
     {
         private WebApplication? _webApp;
-        private CancellationToken _serverCancellationToken;
+        private CancellationTokenSource? _cts;
+        private bool _started;
 
-        /// <summary>
-        /// Initializes and starts the MCP service web application using the specified command-line arguments.
-        /// </summary>
-        /// <remarks>This method configures the web server to use HTTPS on port 3001 and sets up JSON
-        /// serialization options for the MCP service. It should be called once during application startup to ensure the
-        /// service is properly initialized and ready to handle requests.</remarks>
-        /// <param name="args">An array of command-line arguments to configure the web application. Typically includes options for server
-        /// configuration and environment settings.</param>
-        public void InitializeMcpService(string[] args)
+        public void InitializeMcpService(string[] args, string? hostAddress = null, int port = 6805, bool useHttps = true)
         {
+            if (_webApp != null) return; // already built
+
             var builder = WebApplication.CreateSlimBuilder(args);
 
-            // Configure Kestrel to use HTTPS
             builder.WebHost.ConfigureKestrel(options =>
             {
-                options.ListenAnyIP(3001, listenOptions =>
+                if (string.IsNullOrWhiteSpace(hostAddress))
                 {
-                    listenOptions.UseHttps(); // HTTPS
-                });
+                    options.ListenAnyIP(port, listen =>
+                    {
+                        if (useHttps) listen.UseHttps();
+                    });
+                }
+                else
+                {
+                    options.Listen(System.Net.IPAddress.Parse(hostAddress), port, listen =>
+                    {
+                        if (useHttps) listen.UseHttps();
+                    });
+                }
             });
 
             builder.Services.ConfigureHttpJsonOptions(options =>
@@ -39,48 +44,66 @@ namespace KinematicsDemo.Services
                 options.SerializerOptions.TypeInfoResolverChain.Insert(0, RobotJsonContext.Default);
             });
 
-            // Combine resolvers so AOT metadata is available for *all* involved types
             var toolSerializerOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web)
             {
-                TypeInfoResolver = RobotJsonContext.Default,   // Jso serialization from LightsAPICommon
+                TypeInfoResolver = RobotJsonContext.Default,
             };
 
             builder.Services.AddMcpServer()
-                .WithHttpTransport()
-                .WithToolsFromAssembly(serializerOptions: toolSerializerOptions);
+                   .WithHttpTransport()
+                   .WithToolsFromAssembly(serializerOptions: toolSerializerOptions);
 
             _webApp = builder.Build();
 
             var mcpGroup = _webApp.MapGroup("/mcp");
-            mcpGroup.MapMcp();   // <— call MapMcp on the group; all routes get the prefix + auth
-
-            //_webApp.Run(); 
+            mcpGroup.MapMcp();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="hostAddress"></param>
-        /// <returns></returns>
-        /// <exception cref="System.InvalidOperationException"></exception>
-        public Task StartAsync(string hostAddress)
+        public async Task StartAsync(string hostAddress)
         {
-            InitializeMcpService(new string[] { });
+            if (_started) return;
+
+            InitializeMcpService(Array.Empty<string>(), hostAddress: hostAddress);
+
             if (_webApp == null)
             {
-                throw new System.InvalidOperationException("Web application is not initialized.");
+                throw new InvalidOperationException("Web application is not initialized.");
             }
-            _serverCancellationToken = new CancellationToken();
-            return _webApp.StartAsync(_serverCancellationToken);
+
+            _cts = new CancellationTokenSource();
+            // NOTE: StartAsync’s token is for aborting startup, not lifetime.
+            await _webApp.StartAsync(_cts.Token).ConfigureAwait(false);
+            _started = true;
         }
 
-        public void Stop()
+        public async Task StopAsync(CancellationToken cancellationToken = default)
         {
-            if (_webApp == null)
+            if (!_started || _webApp == null) return;
+
+            try
             {
-                throw new System.InvalidOperationException("Web application is not initialized.");
+                _cts?.Cancel(); // signal your own lifetime intent
+                // StopAsync token bounds how long to wait for graceful shutdown.
+                using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                linked.CancelAfter(TimeSpan.FromSeconds(10));
+
+                await _webApp.StopAsync(linked.Token).ConfigureAwait(false);
             }
-            _webApp.StopAsync(_serverCancellationToken).GetAwaiter().GetResult();
+            finally
+            {
+                await DisposeAsync().ConfigureAwait(false);
+                _started = false;
+            }
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (_webApp is IAsyncDisposable asyncDisp)
+                await asyncDisp.DisposeAsync().ConfigureAwait(false);
+
+            _cts?.Dispose();
+            _cts = null;
+            _webApp = null;
         }
     }
 }

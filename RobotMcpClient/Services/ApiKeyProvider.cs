@@ -1,5 +1,4 @@
-﻿
-namespace Lights.MauiClient.Services;
+﻿namespace RobotMcpClient.Services;
 
 /// <summary>
 /// Provides the API key for accessing AI services.

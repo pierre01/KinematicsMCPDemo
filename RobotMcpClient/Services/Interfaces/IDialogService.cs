@@ -1,4 +1,4 @@
-﻿namespace Lights.MauiClient.Services.Interfaces;
+﻿namespace RobotMcpClient.Services.Interfaces;
 
 public interface IDialogService
 {

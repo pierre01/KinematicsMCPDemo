@@ -4,6 +4,7 @@
     <TargetFramework>net9.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+	 <LangVersion>preview</LangVersion>
     <PackageIcon>AppIcon.ico</PackageIcon>
   </PropertyGroup>
   <ItemGroup>
