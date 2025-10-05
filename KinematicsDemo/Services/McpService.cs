@@ -99,7 +99,9 @@ namespace KinematicsDemo.Services
         public async ValueTask DisposeAsync()
         {
             if (_webApp is IAsyncDisposable asyncDisp)
+            {
                 await asyncDisp.DisposeAsync().ConfigureAwait(false);
+            }
 
             _cts?.Dispose();
             _cts = null;

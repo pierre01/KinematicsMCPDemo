@@ -2,12 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RobotMcpClient.Services.Interfaces;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace RobotMcpClient.ViewModels;
 
@@ -16,7 +11,13 @@ public partial class MainPageViewModel : ObservableObject
 
     private int _promptIndex = -1;
 
-    private readonly string[] _userPrompts ;
+    private readonly string[] _userPrompts = [
+                "Move north by 5cm",
+                "Move west by 2 inches",
+                "Go up by 4cm",
+                "Go Home",
+                "Where are you?"
+        ];
 
     //Voice Handling
     private readonly ISpeechToText _speechToText;

@@ -82,6 +82,10 @@ public partial class App : Application
                 0, heightRange, upperArmSegment, forearmSegment, effectorSegment, messageBoxService, fileDialogService, toastService, toolWindowService);
             MainWindow = new RobotWindow(robotArmViewModel);
             RobotMcpTool.Robot = robotArmViewModel;
+            
+            // start the MCP web server
+            IWebServerService webServerService = Services.GetService<IWebServerService>() ?? throw new ArgumentNullException(nameof(webServerService));
+            webServerService.StartAsync(string.Empty).ConfigureAwait(false);
         }
 
         // Display the main window

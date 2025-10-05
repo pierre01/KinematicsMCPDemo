@@ -1,20 +1,28 @@
-﻿namespace Biosero.Kinematics.Common;
+﻿using System.ComponentModel;
 
-public struct RobotCoordinate
+namespace Biosero.Kinematics.Common;
+
+public class RobotCoordinate(double x, double y, double z, double rail)
 {
-    public double Rail { get; set; }
-    public double X { get; set; }
-    public double Y { get; set; }
-    public double Z { get; set; }
+    [Description("Position on the rail in millimeters")]
+    public double Rail { get; set; } = rail;
 
-    public RobotCoordinate(double x, double y, double z, double rail)
+    [Description("X Position (east or west)  in millimeters")]
+    public double X { get; set; } =x;
+
+    [Description("Y Position (north and south)  in millimeters")]
+    public double Y { get; set; }= y;
+
+    [Description("Height Position on the mast in millimeters")]
+    public double Z { get; set; }= z;
+
+
+    public RobotCoordinate():this(0,0,0,0)
     {
-        X = x;
-        Y = y;
-        Z = z;
-        Rail = rail;
+
     }
 
+ 
     public override string ToString()
     {
         return $"X: {X}, Y: {Y}, Z: {Z}, Rail: {Rail}";

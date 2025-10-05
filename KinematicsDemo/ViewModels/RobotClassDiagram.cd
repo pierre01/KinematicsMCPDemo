@@ -43,8 +43,15 @@
   <Class Name="KinematicsDemo.ViewModels.TeachPendantViewModel">
     <Position X="9.75" Y="1" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>EQAAgAgIADQICQAwAAAAxAAAAEABIAAAhAAACCgAIRA=</HashCode>
+      <HashCode>EQAAgAgIADQICQAwAAAAxAAIAEABIAAAhAAACAgAIRA=</HashCode>
       <FileName>ViewModels\TeachPendantViewModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="KinematicsDemo.Services.RobotMcpTool">
+    <Position X="5.25" Y="7" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAAAAAAICAAAAAgAAAABJBAIAAAAgAAAAAAAIAA=</HashCode>
+      <FileName>Services\RobotMcpTool.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

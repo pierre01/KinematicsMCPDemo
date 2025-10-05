@@ -34,6 +34,8 @@ public class SemanticKernelService : ISemanticKernelService
         try
         {        
             _history = [];
+            //Wait 10 seconds before initializing the kernel to allow time for the MCP server to start
+            await Task.Delay(15000);
 
 #pragma warning disable SKEXP0001
             _reducer = new ChatHistoryTruncationReducer(targetCount: 4, thresholdCount: 6);

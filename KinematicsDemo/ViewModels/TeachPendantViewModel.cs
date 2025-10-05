@@ -2,8 +2,6 @@
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using KinematicsDemo.Messages;
 using KinematicsDemo.Models;
 using KinematicsDemo.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -112,7 +110,7 @@ namespace KinematicsDemo.ViewModels
             if (isRemote)
             {
                 RemoteModeTooltip = "Stop Mobile Server";
-                await _webServerService.StartAsync("http://localhost:7276/");
+                await _webServerService.StartAsync(string.Empty);
             }
             else
             {
@@ -122,7 +120,7 @@ namespace KinematicsDemo.ViewModels
         }
 
         [ObservableProperty]
-        public partial string RemoteModeTooltip { get; set; } = "Start Mobile Server";
+        public partial string RemoteModeTooltip { get; set; } = "Stop Mobile Server";
 
 
         /// <summary>
