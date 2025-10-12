@@ -71,8 +71,4 @@
 		<PackageReference Include="ModelContextProtocol-SemanticKernel" Version="0.5.0" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <ProjectReference Include="..\Biosero.Kinematics.Common\Biosero.Kinematics.Common.csproj" />
-	</ItemGroup>
-
 </Project>

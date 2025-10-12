@@ -33,9 +33,4 @@ public class RobotConfiguration
     /// </summary>    
     public double EffectorGripMax { get; set; } = 13.3;
 
-
-    /// <summary>
-    /// Gets or sets robot server listening port
-    /// </summary>
-    public string ServerPort { get; set; } = "5000";
 }

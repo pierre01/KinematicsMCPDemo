@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using Biosero.Kinematics.Common;
-using Biosero.TeachPendant.Common;
 using KinematicsDemo.ViewModels;
 using ModelContextProtocol.Server;
 
@@ -22,90 +21,81 @@ public static class RobotMcpTool
     /// </summary>
     /// <returns>A <see cref="RobotCoordinate"/> representing the end effector's position in the robot's coordinate system.</returns>
     [McpServerTool]
-    [Description("Returns the end effector position")]
+    [Description("Returns the position of the Robot")]
     public static RobotCoordinate GetLastCoordinates()
     {
         return GetCoordinates();
     }
 
-    private static RobotCoordinate GetCoordinates()
-    {
-        if (Robot != null)
-        {
-            var coordinate = new RobotCoordinate(
-                Robot.ArmRailPosition,
-                Robot.MousePoint.X,
-                Robot.MousePoint.Y,
-                Robot.ArmHeightPosition);
-            return coordinate;
-        }
-
-        return new RobotCoordinate(0, 0, 0, 0);
-    }
-
     /// <summary>
     /// Moves the robot arm by the specified increments along each axis and returns the new position.
     /// </summary>
-    /// <param name="railIncrease">The amount, in millimeters, to move the robot arm along the rail axis. Can be positive or negative to indicate
+    /// <param name="railChange">The amount, in millimeters, to move the robot arm along the rail axis. Can be positive or negative to indicate
     /// direction.</param>
-    /// <param name="xIncrease">The amount, in millimeters, to move the robot arm along the X axis. Can be positive or negative to indicate direction.</param>
-    /// <param name="yIncrease">The amount, in millimeters, to move the robot arm along the Y axis. Can be positive or negative to indicate direction.</param>
-    /// <param name="zIncrease">The amount, in millimeters, to move the robot arm along the Z axis. Can be positive or negative to indicate direction.</param>
+    /// <param name="xChange">The amount, in millimeters, to move the robot arm along the X axis. Can be positive or negative to indicate direction.</param>
+    /// <param name="yChange">The amount, in millimeters, to move the robot arm along the Y axis. Can be positive or negative to indicate direction.</param>
+    /// <param name="zChange">The amount, in millimeters, to move the robot arm along the Z axis. Can be positive or negative to indicate direction.</param>
     /// <returns>A RobotCoordinate representing the new position of the robot arm after the movement.</returns>
     [McpServerTool]
-    [Description("Move the robot arm by some unit and returns the new adjusted position coordinates are in Millimeters")]
-    public static async Task<RobotCoordinate> MoveByAsync(
-        [Description("The amount, in millimeters, to move the robot arm along the Rail. Can be positive (Forward) or negative (Backward / Back)) to indicate direction.")] double railIncrease = 0,
-        [Description("The amount, in millimeters, to move the robot arm along the East or West. Can be positive (West / Left) or negative (East / Right) to indicate direction.")] double xIncrease = 0,
-        [Description("The amount, in millimeters, to move the robot arm along the North or South Can be positive (North) or negative (South) to indicate direction.")] double yIncrease = 0,
-        [Description("The amount, in millimeters, to move the robot arm (Up or Down) along the Mast (or Z Axis). Can be positive (Up) or negative (Down) to indicate direction.")] double zIncrease = 0)
+    [Description("Moves the robot arm by a specified distance (in millimeters) along each axis. Positive and negative values indicate direction.The robot moves relative to its current position. (values are not cummulative acreoss call)")]
+    public static async Task<RobotCoordinate> MoveBy(
+            [Description("Distance to move along the rail axis (usually the base linear track). Positive values move the robot forward (away from the home position). Negative values move it backward (toward the home position).")]
+            double railChange = 0,
+            [Description("Distance to move along the X-axis in the robot's local coordinate system. Positive values move the arm to the East (right when facing the robot from the front). Negative values move it to the West (left).")]
+            double xChange = 0,
+            [Description("Distance to move along the Y-axis in the robot's local coordinate system. Positive values move the arm to the North (away from the operator). Negative values move it to the South (toward the operator).")]
+            double yChange = 0,
+            [Description("Distance to move along the Z-axis (vertical mast). Positive values move the end effector upward. Negative values move it downward.")]
+            double zChange = 0)
     {
+
         if (Robot == null)
         {
             return new RobotCoordinate(0, 0, 0, 0);
         }
 
-        RobotCoordinate newCoordinates = new RobotCoordinate(0, 0, 0, 0);;
+        RobotCoordinate newCoordinates = new RobotCoordinate(0, 0, 0, 0); ;
 
+        // Sync to UI thread
         await Application.Current.Dispatcher.InvokeAsync(
             () =>
             {
-                if (railIncrease > 0)
+                if (railChange > 0)
                 {
-                    Robot?.GoForwardCommand.Execute(railIncrease);
+                    Robot?.GoForwardCommand.Execute(railChange);
                 }
-                else if (railIncrease < 0)
+                else if (railChange < 0)
                 {
-                    Robot?.GoBackwardCommand.Execute(-railIncrease);
+                    Robot?.GoBackwardCommand.Execute(-railChange);
                 }
 
-                if (zIncrease > 0)
+                if (zChange > 0)
                 {
-                    Robot?.GoUpCommand.Execute(zIncrease);
+                    Robot?.GoUpCommand.Execute(zChange);
                 }
-                else if (zIncrease < 0)
+                else if (zChange < 0)
                 {
-                    Robot?.GoDownCommand.Execute(-zIncrease);
+                    Robot?.GoDownCommand.Execute(-zChange);
                 }
 
                 // TODO: Needs to be optimized
                 var m = Robot.LastSurfacePoint;
-                if (xIncrease > 0)
+                if (xChange > 0)
                 {
-                    m.X += xIncrease;
+                    m.X += xChange;
                 }
-                else if (xIncrease < 0)
+                else if (xChange < 0)
                 {
-                    m.X += xIncrease;
+                    m.X += xChange;
                 }
 
-                if (yIncrease > 0)
+                if (yChange > 0)
                 {
-                    m.Y += yIncrease;
+                    m.Y -= yChange;
                 }
-                else if (yIncrease < 0)
+                else if (yChange < 0)
                 {
-                    m.Y += yIncrease;
+                    m.Y -= yChange;
                 }
 
                 UpdateAndRefresh(m);
@@ -127,8 +117,8 @@ public static class RobotMcpTool
     /// <param name="zPosition">New z position</param>
     /// <returns>new robot coordinates</returns>
     [McpServerTool]
-    [Description("Move the robot arm to a point in space and returns the new position, coordinates are in Millimeters")]
-    public static async Task<RobotCoordinate> MoveToAsync(
+    [Description("Move the robot arm to a point in space and returns the new position (Furthest possible Reach sor the robot) coordinates are in Millimeters")]
+    public static async Task<RobotCoordinate> MoveTo(
         [Description("Position on the rail in millimeters")] double railPosition,
         [Description("X Position (east or west)  in millimeters")] double xPosition,
         [Description("Y Position (north and south)  in millimeters")] double yPosition,
@@ -142,6 +132,7 @@ public static class RobotMcpTool
 
         RobotCoordinate newCoordinates = new RobotCoordinate(0, 0, 0, 0); ;
 
+        // Sync to the UI Thread
         await Application.Current.Dispatcher.InvokeAsync(
             () =>
             {
@@ -209,44 +200,128 @@ public static class RobotMcpTool
         return newCoordinates;
     }
 
-
-
     [McpServerTool]
-    [Description("Record the current Position")]
-    public static List<RobotCoordinate> RecordCurrentPosition()
+    [Description("Record the current Position and returns the list with the added coordinates")]
+    public static async Task<List<RobotCoordinate>> RecordCurrentPosition()
     {
-        Robot.AddPointCommand.Execute(null);
-        Coordinates.Add(GetCoordinates());
+        await Application.Current.Dispatcher.InvokeAsync(
+        () =>
+        {
+            Robot.AddPointCommand.Execute(null);
+            Coordinates.Add(GetCoordinates());
+        },
+        DispatcherPriority.Send);
         return Coordinates;
     }
 
     [McpServerTool]
     [Description("Play the list of recorded positions")]
-    public static void PlayRecordedPoints()
+    public static async Task PlayRecordedPoints()
     {
-        Robot?.PlayCommand.Execute(null);
+        await Application.Current.Dispatcher.InvokeAsync(
+        () =>
+        {
+            Robot?.PlayCommand.Execute(null);
+        },
+        DispatcherPriority.Send);
+    }
+
+    [McpServerTool]
+    [Description("Stop playing the recorded positions")]
+    public static async Task StopPlaying()
+    {
+        await Application.Current.Dispatcher.InvokeAsync(
+        () =>
+        {
+            Robot?.StopPlayCommand.Execute(null);
+        },
+        DispatcherPriority.Send);
     }
 
     [McpServerTool]
     [Description("Clears the list of recorded positions")]
-    public static void ClearRecordedPoints()
+    public static async Task ClearRecordedPoints()
     {
-        Robot?.RecordedMetaPoints.Points.Clear();
+        await Application.Current.Dispatcher.InvokeAsync(
+        () =>
+        {
+            Robot?.RecordedMetaPoints.Points.Clear();
+        },
+        DispatcherPriority.Send);
+
         Coordinates.Clear();
     }
 
     [McpServerTool]
     [Description("Home the robot to its inital position")]
-    public static RobotCoordinate HomeRobotArm()
+    public static async Task<RobotCoordinate> HomeRobotArm()
     {
-        Robot?.GoHomeCommand.Execute(null);
-        return GetCoordinates();
+        RobotCoordinate newCoordinates  = new RobotCoordinate(0, 0, 0, 0);
+        await Application.Current.Dispatcher.InvokeAsync(
+            () =>
+            {
+
+                Robot?.GoHomeCommand.Execute(null);
+        
+                newCoordinates = GetCoordinates();
+
+            },
+            DispatcherPriority.Send);
+
+        return newCoordinates;
     }
 
-    private static void UpdateAndRefresh(Point m)
+    /// <summary>
+    /// Retrieves the current coordinates of the robot, including mouse position and arm positions.
+    /// </summary>
+    /// <returns>A <see cref="RobotCoordinate"/> representing the robot's current mouse X and Y positions, arm height, and arm
+    /// rail position. If the robot is not available, returns a coordinate with all values set to zero.</returns>
+    private static RobotCoordinate GetCoordinates()
     {
-        Robot?.MousePoint = m;
-        Robot?.LastSurfacePoint = m;
-        Robot?.RefreshDrawing();
+        if (Robot != null)
+        {
+            var coordinate = new RobotCoordinate(
+                Robot.MousePoint.X,
+                Robot.MousePoint.Y,
+                Robot.ArmHeightPosition,
+                Robot.ArmRailPosition);
+
+            return coordinate;
+        }
+
+        return new RobotCoordinate(0, 0, 0, 0);
+    }
+
+    /// <summary>
+    /// Updates the robot's mouse and surface positions to the specified point and refreshes its drawing state.
+    /// === ONLY CALL FROM UI THREAD ===
+    /// </summary>
+    /// <param name="m">The point to set as the robot's current mouse and surface position.</param>
+    private static async Task UpdateAndRefresh(Point m)
+    {
+        if( Robot == null)
+        {
+            return;
+        }
+
+        // Test if we are inside the UI thread 
+        if (Application.Current.Dispatcher.CheckAccess())
+        {
+            // We are on the UI thread
+            Robot.MousePoint = m;
+            Robot.LastSurfacePoint = m;
+            Robot.RefreshDrawing();
+        }
+        else
+        {
+           await Application.Current.Dispatcher.InvokeAsync(
+           () =>
+            {
+                Robot.MousePoint = m;
+                Robot.LastSurfacePoint = m;
+                Robot.RefreshDrawing();
+            },
+           DispatcherPriority.Send);
+        }
     }
 }

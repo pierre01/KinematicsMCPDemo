@@ -43,7 +43,7 @@ public partial class App : Application
         services.AddTransient<IFileDialogService, FileDialog>();
         services.AddSingleton<IMessageBoxService, MessageBoxService>();
         services.AddSingleton<IToolWindowService, ToolWindowService>();
-        services.AddSingleton<IWebServerService, McpService>();
+        services.AddSingleton<IMCPServer, McpService>();
 
         return services.BuildServiceProvider();
     }
@@ -67,13 +67,13 @@ public partial class App : Application
         }
         else
         {
-            // Mast freedom 400 mm standard, 750 mm or 1160 mm options available (0 is in center)
+            // Mast freedom 400 mm standard, 750 mm or 1160 mm options available (0 is at bottom)
             // Rail Option Goes 1, Meter, 1.5 Meter or 2 Meter (0 is in Center
             var upperArmSegment = new Segment(0, 0, 225, 0, -90, 90);
             var forearmSegment = new Segment(upperArmSegment, 210, 0, -167, 167);
             var effectorSegment = new Segment(forearmSegment, 144, 0, -970, 970);
             var heightRange = new KRange(0, 400); // 40 cm  mast
-            var railRange = new KRange(-500, 500); // 1 meter rail - if no rail , then 0
+            var railRange = new KRange(-500, 500); // 1 meter rail - if no rail , then 0 (Origin is at center of Rail)
             IMessageBoxService messageBoxService = Services.GetService<IMessageBoxService>() ?? throw new ArgumentNullException(nameof(messageBoxService));
             IFileDialogService fileDialogService = Services.GetService<IFileDialogService>() ?? throw new ArgumentNullException(nameof(fileDialogService));
             IToastService toastService = Services.GetService<IToastService>() ?? throw new ArgumentNullException(nameof(toastService));
@@ -84,7 +84,7 @@ public partial class App : Application
             RobotMcpTool.Robot = robotArmViewModel;
             
             // start the MCP web server
-            IWebServerService webServerService = Services.GetService<IWebServerService>() ?? throw new ArgumentNullException(nameof(webServerService));
+            IMCPServer webServerService = Services.GetService<IMCPServer>() ?? throw new ArgumentNullException(nameof(webServerService));
             webServerService.StartAsync(string.Empty).ConfigureAwait(false);
         }
 

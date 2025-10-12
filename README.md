@@ -11,6 +11,7 @@ The robot can move on the Z AXis by moving up and down a mast, whilst moving the
 ## Technologies used
 * **WPF** for the UI
 * SkiaSharp for the overlay kinematic graphics
+* The MCP server is started at the begining of the WPF app
 * NO other libraries are used
 ## Start with simple kinematic chain
 in this example we will simulate a scara robot with 3 joints. 
@@ -31,7 +32,7 @@ The playback is based on Robot joints the angles Delta, (and not anymore the rev
 ## The user can lock joints to an angle
 each Robot joint can be locked to an angle. The angle is set by the user. The user can lock the joint to an angle by clicking on the button. The joint will be locked to the angle closest to the current angle of the joint. 
 The user can unlock the joint by clicking on the button again.
-## A teach pendand was added to control the end effector position
+## A teach pendant was added to control the end effector position
 The teach pendant is a simple UI that allows the user to control the end effector position. The user can move the end effector on the X and Y axis. The user can also move the end effector on the X,Y,and Z axis
 The teach pendant UI also allows the user to record the position. The user can also play the recorded positions, And move the robot on the rail X axis
 

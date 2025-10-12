@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KinematicsDemo.Services
 {
-    public class McpService : IWebServerService, IAsyncDisposable
+    public class McpService : IMCPServer, IAsyncDisposable
     {
         private WebApplication? _webApp;
         private CancellationTokenSource? _cts;

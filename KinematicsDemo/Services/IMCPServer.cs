@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace KinematicsDemo.Services;
 
-internal interface IWebServerService
+internal interface IMCPServer
 {
     Task StartAsync(string hostAddress);
 

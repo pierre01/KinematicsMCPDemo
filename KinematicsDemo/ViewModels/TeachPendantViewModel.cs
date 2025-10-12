@@ -15,7 +15,7 @@ namespace KinematicsDemo.ViewModels
     /// </summary>
     public partial class TeachPendantViewModel : ObservableObject
     {
-        private readonly IWebServerService _webServerService;
+        private readonly IMCPServer _webServerService;
         private RobotArmViewModel _robotViewModel;
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace KinematicsDemo.ViewModels
         /// <param name="robotViewModel">ViewModel </param>
         public TeachPendantViewModel(RobotArmViewModel robotViewModel)
         {
-            _webServerService = App.Current.Services.GetRequiredService<IWebServerService>();
+            _webServerService = App.Current.Services.GetRequiredService<IMCPServer>();
 
             _robotViewModel = robotViewModel;
             _x = _robotViewModel.MousePoint.X;
