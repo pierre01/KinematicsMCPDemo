@@ -41,20 +41,37 @@ public class SemanticKernelService : ISemanticKernelService
             _reducer = new ChatHistoryTruncationReducer(targetCount: 4, thresholdCount: 6);
 #pragma warning restore SKEXP0001
 
-            var openAiApiKey = await ApiKeyProvider.GetApiKeyAsync();
-            var openApiOrgId = await ApiKeyProvider.GetAiOrgId();
-            if (string.IsNullOrWhiteSpace(openAiApiKey))
-                throw new InvalidOperationException("API key is not set.");
-
+            // If you keep cloud as an option, set useLocal = true/false to toggle
+            var useLocal = true;
             _builder = Kernel.CreateBuilder();
 
-            // OpenAI chat connector
-            _builder.Services.AddOpenAIChatCompletion(
-                modelId: chatModel,
-                apiKey: openAiApiKey,
-                orgId: openApiOrgId,
-                serviceId: "Kinematics"
-            );
+            if (!useLocal)
+            {
+                var openAiApiKey = await ApiKeyProvider.GetApiKeyAsync();
+                var openApiOrgId = await ApiKeyProvider.GetAiOrgId();
+                if (string.IsNullOrWhiteSpace(openAiApiKey))
+                    throw new InvalidOperationException("API key is not set.");
+
+                _builder.AddOpenAIChatCompletion(
+                    apiKey: openAiApiKey,
+                    modelId: "gpt-5-mini",
+                    orgId: openApiOrgId,
+                    serviceId: "OpenAI"
+                );
+            }
+            else
+            {
+                _builder.AddOpenAIChatCompletion(
+                   apiKey: "local-key",
+                   modelId: "gpt-oss-20b",
+                   endpoint: new Uri("https://localhost:8443/v1"),
+                   orgId: null,
+                   serviceId: "LocalGPT"
+               );
+
+
+            }
+
 
             // Let the model auto-invoke MCP tools when helpful
 #pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
@@ -80,7 +97,7 @@ public class SemanticKernelService : ISemanticKernelService
             // Optional: inspect/trace tool invocations
             _kernel.FunctionInvocationFilters.Add(new FunctionInvocationFilter());
 
-            _chatCompletionService = _kernel.GetRequiredService<IChatCompletionService>();
+            _chatCompletionService = _kernel.GetRequiredService<IChatCompletionService>("LocalGPT");
 
         }
         catch (Exception ex)
