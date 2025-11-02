@@ -4,6 +4,7 @@ using Microsoft.SemanticKernel.Connectors.OpenAI;
 using ModelContextProtocol.SemanticKernel.Extensions;
 using RobotMcpClient.Services.Interfaces;
 using System.Diagnostics;
+using System.Net.Security;
 
 namespace RobotMcpClient.Services;
 
@@ -61,13 +62,33 @@ public class SemanticKernelService : ISemanticKernelService
             }
             else
             {
+                // Build a handler that skips CRL/OCSP (revocation) for localhost only.
+                var handler = new HttpClientHandler
+                {
+                    CheckCertificateRevocationList = false,
+                    ServerCertificateCustomValidationCallback = (req, cert, chain, errors) =>
+                    {
+                        // Allow only our localhost certs; still fail anything else
+                        if (cert?.Subject?.Contains("CN=localhost", StringComparison.OrdinalIgnoreCase) == true)
+                            return true;
+
+                        return errors == SslPolicyErrors.None;
+                    }
+                };
+
+                var httpsClient = new HttpClient(handler)
+                {
+                    BaseAddress = new Uri("https://localhost:8443/v1")
+                };
+
+                // Register the local vLLM endpoint with Semantic Kernel
                 _builder.AddOpenAIChatCompletion(
-                   apiKey: "local-key",
-                   modelId: "gpt-oss-20b",
-                   endpoint: new Uri("https://localhost:8443/v1"),
-                   orgId: null,
-                   serviceId: "LocalGPT"
-               );
+                    apiKey: "local-key",
+                    modelId: "gpt-oss-20b",            // must match --served-model-name
+                    orgId: null,
+                    serviceId: "LocalGPT",
+                    httpClient: httpsClient
+                );
 
 
             }
@@ -77,9 +98,11 @@ public class SemanticKernelService : ISemanticKernelService
 #pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             _openAIPromptExecutionSettings = new()
             {
-                //ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
-                FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(options: new() { RetainArgumentTypes = true }),
-                Temperature = 1,
+                Temperature = 0.7,
+                // This is the key line – lets the model pick functions
+               ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
+
+                MaxTokens = 1024
             };
 #pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
