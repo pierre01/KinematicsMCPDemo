@@ -12,10 +12,10 @@ public partial class MainPageViewModel : ObservableObject
     private int _promptIndex = -1;
 
     private readonly string[] _userPrompts = [
-                "Move north by 5cm",
-                "Move west by 2 inches",
-                "Move west by 2 inches and up by 24mm",
-                "To do a Square: Record position, then Move west by 5cm, Record position, then move south by 5cm, Record position, then move east by 5cm, Record Position, then move north by 5cm",
+                "Move left by 5cm",
+                "Retract arm by 2 inches",
+                "Retract arm by 2 inches and up by 24mm",
+                "To do a Square: Record position, then retract arm by 5cm, Record position, then move right by 5cm, Record position, then extend arm by 5cm, Record Position, then move left by 5cm",
                 "Do a Square but twice as big",
                 "Play",
                 "Go up by 10cm",

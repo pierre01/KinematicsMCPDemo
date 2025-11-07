@@ -138,6 +138,8 @@
                 Text="400" />
 
         </Canvas>
+        <Label Content="UP" HorizontalAlignment="Left" Margin="10,71,0,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI Semibold" Foreground="#FF00AEEF"/>
+        <Label Content="Down" HorizontalAlignment="Left" Margin="10,258,0,0" VerticalAlignment="Top" FontWeight="Bold" FontFamily="Segoe UI Semibold" Foreground="#FF00AEEF"/>
 
     </Grid>
 </UserControl>

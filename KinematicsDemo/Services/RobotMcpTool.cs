@@ -30,23 +30,23 @@ public static class RobotMcpTool
     /// <summary>
     /// Moves the robot arm by the specified increments along each axis and returns the new position.
     /// </summary>
-    /// <param name="railChange">The amount, in millimeters, to move the robot arm along the rail axis. Can be positive or negative to indicate
+    /// <param name="railChangeBy">The amount, in millimeters, to move the robot arm along the rail axis. Can be positive or negative to indicate
     /// direction.</param>
-    /// <param name="xChange">The amount, in millimeters, to move the robot arm along the X axis. Can be positive or negative to indicate direction.</param>
-    /// <param name="yChange">The amount, in millimeters, to move the robot arm along the Y axis. Can be positive or negative to indicate direction.</param>
-    /// <param name="zChange">The amount, in millimeters, to move the robot arm along the Z axis. Can be positive or negative to indicate direction.</param>
+    /// <param name="armExtendBy">The amount, in millimeters, to move the robot arm along the X axis. Can be positive or negative to indicate direction.</param>
+    /// <param name="armLeftRightBy">The amount, in millimeters, to move the robot arm along the Y axis. Can be positive or negative to indicate direction.</param>
+    /// <param name="armUpDownBy">The amount, in millimeters, to move the robot arm along the Z axis. Can be positive or negative to indicate direction.</param>
     /// <returns>A RobotCoordinate representing the new position of the robot arm after the movement.</returns>
     [McpServerTool]
     [Description("Moves the robot arm by a specified distance (in millimeters) along each axis. Positive and negative values indicate direction.The robot moves relative to its current position. (values are not cummulative acreoss call)")]
     public static async Task<RobotCoordinate> MoveBy(
-            [Description("Distance to move along the rail axis (usually the base linear track). Positive values move the robot forward (away from the home position). Negative values move it backward (toward the home position).")]
-            double railChange = 0,
-            [Description("Distance to move along the X-axis in the robot's local coordinate system. Positive values move the arm to the East (right when facing the robot from the front). Negative values move it to the West (left).")]
-            double xChange = 0,
-            [Description("Distance to move along the Y-axis in the robot's local coordinate system. Positive values move the arm to the North (away from the operator). Negative values move it to the South (toward the operator).")]
-            double yChange = 0,
-            [Description("Distance to move along the Z-axis (vertical mast). Positive values move the end effector upward. Negative values move it downward.")]
-            double zChange = 0)
+            [Description("Distance to move along the rail axis (usually the base linear track). Positive values move the robot forward on the rail (away from the home position). Negative values move it backward on the rail (toward the home position). instructions should include the word rail (e.g. rail forward, rail backward)")]
+            double railChangeBy = 0,
+            [Description("Distance to move along the X-axis in the robot's local coordinate system. Positive values move the arm to the reach / reach forward / extend (right when facing the robot from the front). Negative values retract the arm (left).")]
+            double armExtendBy = 0,
+            [Description("Distance to move along the Y-axis in the robot's local coordinate system. Positive values move the arm to the Left (away from the operator). Negative values move it to the right (toward the operator).")]
+            double armLeftRightBy = 0,
+            [Description("Distance to move along the Z-axis (vertical mast). Positive values move the end effector up / upward. Negative values move it down / downward.")]
+            double armUpDownBy = 0)
     {
 
         if (Robot == null)
@@ -60,42 +60,42 @@ public static class RobotMcpTool
         await Application.Current.Dispatcher.InvokeAsync(
             () =>
             {
-                if (railChange > 0)
+                if (railChangeBy > 0)
                 {
-                    Robot?.GoForwardCommand.Execute(railChange);
+                    Robot?.GoForwardCommand.Execute(railChangeBy);
                 }
-                else if (railChange < 0)
+                else if (railChangeBy < 0)
                 {
-                    Robot?.GoBackwardCommand.Execute(-railChange);
+                    Robot?.GoBackwardCommand.Execute(-railChangeBy);
                 }
 
-                if (zChange > 0)
+                if (armUpDownBy > 0)
                 {
-                    Robot?.GoUpCommand.Execute(zChange);
+                    Robot?.GoUpCommand.Execute(armUpDownBy);
                 }
-                else if (zChange < 0)
+                else if (armUpDownBy < 0)
                 {
-                    Robot?.GoDownCommand.Execute(-zChange);
+                    Robot?.GoDownCommand.Execute(-armUpDownBy);
                 }
 
                 // TODO: Needs to be optimized
                 var m = Robot.LastSurfacePoint;
-                if (xChange > 0)
+                if (armExtendBy > 0)
                 {
-                    m.X += xChange;
+                    m.X += armExtendBy;
                 }
-                else if (xChange < 0)
+                else if (armExtendBy < 0)
                 {
-                    m.X += xChange;
+                    m.X += armExtendBy;
                 }
 
-                if (yChange > 0)
+                if (armLeftRightBy > 0)
                 {
-                    m.Y -= yChange;
+                    m.Y -= armLeftRightBy;
                 }
-                else if (yChange < 0)
+                else if (armLeftRightBy < 0)
                 {
-                    m.Y -= yChange;
+                    m.Y -= armLeftRightBy;
                 }
 
                 UpdateAndRefresh(m);

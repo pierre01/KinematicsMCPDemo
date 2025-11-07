@@ -2,10 +2,10 @@
 
 public enum MoveDirection
 {
-    North,
-    South,
-    West,
-    East,
+    Left,
+    Right,
+    Retract,
+    Extend,
     Up,
     Down,
     Forward,

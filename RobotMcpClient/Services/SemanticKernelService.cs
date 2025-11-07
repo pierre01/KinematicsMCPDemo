@@ -43,11 +43,13 @@ public class SemanticKernelService : ISemanticKernelService
 #pragma warning restore SKEXP0001
 
             // If you keep cloud as an option, set useLocal = true/false to toggle
-            var useLocal = true;
-            _builder = Kernel.CreateBuilder();
+            var useLocal = false;
 
+            _builder = Kernel.CreateBuilder();
+            string serviceID = "LocalGPT";
             if (!useLocal)
             {
+                serviceID = "RemoteGPT"; //Use OpenAI API
                 var openAiApiKey = await ApiKeyProvider.GetApiKeyAsync();
                 var openApiOrgId = await ApiKeyProvider.GetAiOrgId();
                 if (string.IsNullOrWhiteSpace(openAiApiKey))
@@ -55,13 +57,14 @@ public class SemanticKernelService : ISemanticKernelService
 
                 _builder.AddOpenAIChatCompletion(
                     apiKey: openAiApiKey,
-                    modelId: "gpt-5-mini",
+                    modelId: chatModel,
                     orgId: openApiOrgId,
-                    serviceId: "OpenAI"
+                    serviceId:serviceID
                 );
             }
             else
             {
+                serviceID = "LocalGPT"; 
                 // Build a handler that skips CRL/OCSP (revocation) for localhost only.
                 var handler = new HttpClientHandler
                 {
@@ -86,7 +89,7 @@ public class SemanticKernelService : ISemanticKernelService
                     apiKey: "local-key",
                     modelId: "gpt-oss-20b",            // must match --served-model-name
                     orgId: null,
-                    serviceId: "LocalGPT",
+                    serviceId: serviceID,
                     httpClient: httpsClient
                 );
 
@@ -98,11 +101,11 @@ public class SemanticKernelService : ISemanticKernelService
 #pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             _openAIPromptExecutionSettings = new()
             {
-                Temperature = 0.7,
+                Temperature = 1,
                 // This is the key line – lets the model pick functions
                ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
 
-                MaxTokens = 1024
+                MaxTokens = 1024  
             };
 #pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
@@ -120,7 +123,7 @@ public class SemanticKernelService : ISemanticKernelService
             // Optional: inspect/trace tool invocations
             _kernel.FunctionInvocationFilters.Add(new FunctionInvocationFilter());
 
-            _chatCompletionService = _kernel.GetRequiredService<IChatCompletionService>("LocalGPT");
+            _chatCompletionService = _kernel.GetRequiredService<IChatCompletionService>(serviceID);
 
         }
         catch (Exception ex)

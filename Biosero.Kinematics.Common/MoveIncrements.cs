@@ -2,16 +2,16 @@
 
 public class MoveIncrements
 {
-    public static readonly RobotCoordinate North
+    public static readonly RobotCoordinate Left
         = new() { X = 0, Y = 1, Z = 0, Rail = 0 };
 
-    public static readonly RobotCoordinate South
+    public static readonly RobotCoordinate Right
         = new() { X = 0, Y = -1, Z = 0, Rail = 0 };
 
-    public static readonly RobotCoordinate West
+    public static readonly RobotCoordinate Retract
         = new() { X = -1, Y = 0, Z = 0, Rail = 0 };
 
-    public static readonly RobotCoordinate East
+    public static readonly RobotCoordinate Extend
         = new() { X = 1, Y = 0, Z = 0, Rail = 0 };
 
     public static readonly RobotCoordinate Up
@@ -29,10 +29,10 @@ public class MoveIncrements
     public static RobotCoordinate GetIncrement(MoveDirection direction)
         => direction switch
         {
-            MoveDirection.North => North,
-            MoveDirection.South => South,
-            MoveDirection.West => West,
-            MoveDirection.East => East,
+            MoveDirection.Left => Left,
+            MoveDirection.Right => Right,
+            MoveDirection.Retract => Retract,
+            MoveDirection.Extend => Extend,
             MoveDirection.Up => Up,
             MoveDirection.Down => Down,
             MoveDirection.Forward => Forward,
