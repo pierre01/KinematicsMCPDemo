@@ -29,7 +29,7 @@ public partial class RobotWindow : Window
     {
         _robotViewModel = robotArmViewModel;
         _robotViewModel.Refresh += ArmView_Refresh;
-        DataContext = _robotViewModel;        
+        DataContext = _robotViewModel;
         InitializeComponent();
 
     }
