@@ -7,10 +7,10 @@ public class RobotCoordinate(double x, double y, double z, double rail)
     [Description("Position on the rail in millimeters")]
     public double Rail { get; set; } = rail;
 
-    [Description("X Position (east or west)  in millimeters")]
+    [Description("X Position (extended or retracted)  in millimeters")]
     public double X { get; set; } =x;
 
-    [Description("Y Position (north and south)  in millimeters")]
+    [Description("Y Position (Left or right)  in millimeters")]
     public double Y { get; set; }= y;
 
     [Description("Height Position on the mast in millimeters")]
