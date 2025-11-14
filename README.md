@@ -8,11 +8,18 @@ The robot can move on the Z AXis by moving up and down a mast, whilst moving the
 
 ![image](KinematicsDemo/ReadMeImages/KinematicsSampleMain.png)
 
+## Solution structure
+* **WPF** Application for the Robot UI and MCP Server
+* **MAUI** Application for the mobile client to connect to the MCP server and control the robot remotely
 ## Technologies used
 * **WPF** for the UI
 * SkiaSharp for the overlay kinematic graphics
 * The MCP server is started at the begining of the WPF app
-* NO other libraries are used
+* MAUI for the mobile client
+* Semantic Kernel  in the MAUI Client to talk to the MCP server using OpenAI GPT LLM to call on the server commands
+
+
+
 ## Start with simple kinematic chain
 in this example we will simulate a scara robot with 3 joints. 
 The first joint is fixed to the origin, the second joint is fixed to the first joint and the third joint is fixed to the second joint. The end effector is fixed to the third joint. The joints are drawn

@@ -1,4 +1,8 @@
-﻿using System;
+﻿// <copyright file="App.xaml.cs" company="Biosero">
+// Copyright (c) Biosero. All rights reserved.
+// </copyright>
+
+using System;
 using System.Windows;
 using KinematicsDemo.Models;
 using KinematicsDemo.Services;
@@ -15,9 +19,13 @@ namespace KinematicsDemo;
 /// </summary>
 public partial class App : Application
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="App"/> class and configures application services.
+    /// </summary>
+    /// <remarks>This constructor sets up the application's service dependencies and performs component
+    /// initialization. It should be called once when the application starts.</remarks>
     public App()
     {
-
         Services = ConfigureServices();
 
         this.InitializeComponent();
@@ -48,6 +56,15 @@ public partial class App : Application
         return services.BuildServiceProvider();
     }
 
+    /// <summary>
+    /// Handles application startup logic, including processing command-line arguments and initializing the main window
+    /// and core services.
+    /// </summary>
+    /// <remarks>If a configuration file is specified as a command-line argument, the application loads robot
+    /// parameters from that file. Otherwise, default robot configuration values are used. This method also initializes
+    /// essential services and starts the MCP web server before displaying the main window.</remarks>
+    /// <param name="e">An object that contains the event data for the startup event, including command-line arguments.</param>
+    /// <exception cref="ArgumentNullException">Thrown if a required service cannot be resolved during startup.</exception>
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -82,7 +99,7 @@ public partial class App : Application
                 0, heightRange, upperArmSegment, forearmSegment, effectorSegment, messageBoxService, fileDialogService, toastService, toolWindowService);
             MainWindow = new RobotWindow(robotArmViewModel);
             RobotMcpTool.Robot = robotArmViewModel;
-            
+
             // start the MCP web server
             IMCPServer webServerService = Services.GetService<IMCPServer>() ?? throw new ArgumentNullException(nameof(webServerService));
             webServerService.StartAsync(string.Empty).ConfigureAwait(false);
