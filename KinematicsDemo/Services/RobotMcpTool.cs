@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using Biosero.Kinematics.Common;
 using KinematicsDemo.ViewModels;
@@ -41,11 +40,11 @@ public static class RobotMcpTool
     public static async Task<RobotCoordinate> MoveBy(
             [Description("Distance to move along the rail axis (usually the base linear track). Positive values move the robot forward on the rail (away from the home position). Negative values move it backward on the rail (toward the home position). instructions should include the word rail (e.g. rail forward, rail backward)")]
             double railChangeBy = 0,
-            [Description("Distance to move along the X-axis in the robot's local coordinate system. Positive values move the arm to the reach / reach forward / extend (right when facing the robot from the front). Negative values retract the arm (left).")]
+            [Description("Distance to move along the X-axis in the robot's local coordinate system. Positive values move the arm to reach forward / extend. Negative values retract the arm (towards the mast)).")]
             double armExtendBy = 0,
-            [Description("Distance to move along the Y-axis in the robot's local coordinate system. Positive values move the arm to the Left (away from the operator). Negative values move it to the right (toward the operator).")]
+            [Description("Distance to move along the Y-axis in the robot's local coordinate system. Positive values move the arm to the Left. Negative values move it to the right.")]
             double armLeftRightBy = 0,
-            [Description("Distance to move along the Z-axis (vertical mast). Positive values move the end effector up / upward. Negative values move it down / downward.")]
+            [Description("Distance to move along the Z-axis (vertical mast). Positive values move the arm up / upward. Negative values move it down / downward.")]
             double armUpDownBy = 0)
     {
 
@@ -120,9 +119,9 @@ public static class RobotMcpTool
     [Description("Move the robot arm to a point in space and returns the new position (Furthest possible Reach sor the robot) coordinates are in Millimeters")]
     public static async Task<RobotCoordinate> MoveTo(
         [Description("Position on the rail in millimeters")] double railPosition,
-        [Description("X Position (east or west)  in millimeters")] double xPosition,
-        [Description("Y Position (north and south)  in millimeters")] double yPosition,
-        [Description("Height Position on the mast in millimeters")] double zPosition)
+        [Description("X Position of the arm effector extended or retracted in millimeters")] double xPosition,
+        [Description("Y Position of the arm effector (Left and right)  in millimeters")] double yPosition,
+        [Description("Height Position of the arm on the mast in millimeters")] double zPosition)
     {
         // Get the current Z position and move down if needed based on the zPosition
         if (Robot == null)
