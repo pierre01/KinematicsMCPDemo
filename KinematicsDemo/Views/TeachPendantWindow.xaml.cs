@@ -41,5 +41,10 @@ namespace KinematicsDemo.Views
             _animateSignal.Pause();
             _animateSignal.Seek(TimeSpan.Zero);
         }
+
+        private void WindowLoaded(object sender, RoutedEventArgs e)
+        {
+            ToggleServerButton.IsChecked = true;
+        }
     }
 }

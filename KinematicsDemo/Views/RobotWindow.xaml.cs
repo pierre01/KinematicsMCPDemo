@@ -29,7 +29,7 @@ public partial class RobotWindow : Window
     {
         _robotViewModel = robotArmViewModel;
         _robotViewModel.Refresh += ArmView_Refresh;
-        DataContext = _robotViewModel;        
+        DataContext = _robotViewModel;
         InitializeComponent();
 
     }
@@ -216,13 +216,11 @@ public partial class RobotWindow : Window
         var scale = 10; // 10 cm
         var scaleLength = scale * 10; // 100 mm
         var scaleHeight = 10; // 10 mm
-        var scaleStart = new Point(rc.Width / 4 - scaleLength, rc.Height / 2 - scaleHeight - 100);
-        var scaleEnd = new Point(rc.Width / 4, rc.Height / 2 - 100);
+        var scaleStart = new Point((rc.Width / 4) - scaleLength, (rc.Height / 2) - scaleHeight - 100);
+        var scaleEnd = new Point(rc.Width / 4, (rc.Height / 2) - 100);
         canvas.DrawLine((float)scaleStart.X, (float)scaleEnd.Y - 5, (float)scaleEnd.X, (float)scaleEnd.Y - 5, SkiaColors.EffectorPaint);
-        //canvas.DrawLine((float)scaleStart.X, (float)scaleStart.Y, (float)scaleStart.X,
-        //    (float)scaleStart.Y + scaleHeight, _effectorPaint);
 
-        // Draw ticks on the scale  very 1 cm
+        // Draw ticks on the scale every 1 cm
         for (int i = 0; i <= scale; i++)
         {
             var markStart = new Point(scaleStart.X + i * 10, scaleStart.Y);
@@ -230,7 +228,10 @@ public partial class RobotWindow : Window
             canvas.DrawLine((float)markStart.X, (float)markStart.Y, (float)markEnd.X, (float)markEnd.Y, SkiaColors.EffectorPaint);
         }
 
-        canvas.DrawText($"{scale} cm", (float)scaleStart.X + 25, (float)scaleStart.Y + 26, SkiaColors.PathPaint);
+        // Use the new overload: DrawText(string text, float x, float y, SKTextAlign textAlign, SKFont font, SKPaint paint)
+        // We'll use SKTextAlign.Left and a default font from the paint
+        var font = new SKFont();
+        canvas.DrawText($"{scale} cm", (float)scaleStart.X + 25, (float)scaleStart.Y + 26, SKTextAlign.Left, font, SkiaColors.PathPaint);
     }
 
     protected override void OnClosing(CancelEventArgs e)

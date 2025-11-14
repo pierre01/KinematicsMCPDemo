@@ -6,13 +6,16 @@ namespace KinematicsDemo.ViewModels
     public class RefreshDrawingEventArgs:EventArgs
     {
         private MetaPoint? _point;
+
         private static RefreshDrawingEventArgs _empty = new RefreshDrawingEventArgs();
+
         public static new RefreshDrawingEventArgs Empty => _empty;
 
         public RefreshDrawingEventArgs()
         {
-            
+
         }
+
         public RefreshDrawingEventArgs(MetaPoint point)
         {
             Point = point;

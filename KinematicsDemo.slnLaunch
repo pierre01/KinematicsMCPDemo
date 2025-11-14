@@ -1,0 +1,16 @@
+[
+  {
+    "Name": "Startup  Profile",
+    "Projects": [
+      {
+        "Path": "KinematicsDemo\\KinematicsDemo.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "RobotMcpClient\\RobotMcpClient.csproj",
+        "Action": "Start",
+        "DebugTarget": "Windows Machine"
+      }
+    ]
+  }
+]

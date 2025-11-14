@@ -2,8 +2,6 @@
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using KinematicsDemo.Messages;
 using KinematicsDemo.Models;
 using KinematicsDemo.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,8 +15,7 @@ namespace KinematicsDemo.ViewModels
     /// </summary>
     public partial class TeachPendantViewModel : ObservableObject
     {
-        private readonly IWebServerCommandParser _webServerCommandParser;
-        private readonly IWebServerService _webServerService;
+        private readonly IMCPServer _webServerService;
         private RobotArmViewModel _robotViewModel;
 
         /// <summary>
@@ -27,8 +24,7 @@ namespace KinematicsDemo.ViewModels
         /// <param name="robotViewModel">ViewModel </param>
         public TeachPendantViewModel(RobotArmViewModel robotViewModel)
         {
-            _webServerCommandParser = App.Current.Services.GetRequiredService<IWebServerCommandParser>();
-            _webServerService = App.Current.Services.GetRequiredService<IWebServerService>();
+            _webServerService = App.Current.Services.GetRequiredService<IMCPServer>();
 
             _robotViewModel = robotViewModel;
             _x = _robotViewModel.MousePoint.X;
@@ -36,8 +32,6 @@ namespace KinematicsDemo.ViewModels
             _z = _robotViewModel.ArmHeightPosition;
             _railPosition = _robotViewModel.ArmRailPosition;
 
-            WeakReferenceMessenger.Default.Register<WebServerRequestMessage>(this, (r, m)
-                => _webServerCommandParser.ParseCommand(this, m.Value));
         }
 
         [ObservableProperty]
@@ -116,25 +110,18 @@ namespace KinematicsDemo.ViewModels
             if (isRemote)
             {
                 RemoteModeTooltip = "Stop Mobile Server";
-                await _webServerService.StartAsync("http://localhost:7276/");
+                await _webServerService.StartAsync(string.Empty);
             }
             else
             {
                 RemoteModeTooltip = "Start Mobile Server";
-                _webServerService.Stop();
+                await _webServerService.StopAsync();
             }
         }
 
         [ObservableProperty]
-        private string _remoteModeTooltip = "Start Mobile Server";
+        public partial string RemoteModeTooltip { get; set; } = "Stop Mobile Server";
 
-
-        private void UpdateAndRefresh(Point m)
-        {
-            _robotViewModel.MousePoint = m;
-            _robotViewModel.LastSurfacePoint = m;
-            _robotViewModel.RefreshDrawing();
-        }
 
         /// <summary>
         /// Record the current point
@@ -182,7 +169,6 @@ namespace KinematicsDemo.ViewModels
             m.Y -= StepPrecision;
             Y = m.Y;
             UpdateAndRefresh(m);
-
         }
 
         /// <summary>
@@ -267,6 +253,14 @@ namespace KinematicsDemo.ViewModels
                 _robotViewModel.GoBackwardCommand.Execute(StepPrecision);
                 RailPosition = _robotViewModel.ArmRailPosition;
             }
+        }        
+        
+        private void UpdateAndRefresh(Point m)
+        {
+            _robotViewModel.MousePoint = m;
+            _robotViewModel.LastSurfacePoint = m;
+            _robotViewModel.RefreshDrawing();
         }
+
     }
 }

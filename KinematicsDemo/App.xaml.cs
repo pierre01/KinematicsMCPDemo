@@ -1,4 +1,8 @@
-﻿using System;
+﻿// <copyright file="App.xaml.cs" company="Biosero">
+// Copyright (c) Biosero. All rights reserved.
+// </copyright>
+
+using System;
 using System.Windows;
 using KinematicsDemo.Models;
 using KinematicsDemo.Services;
@@ -15,9 +19,13 @@ namespace KinematicsDemo;
 /// </summary>
 public partial class App : Application
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="App"/> class and configures application services.
+    /// </summary>
+    /// <remarks>This constructor sets up the application's service dependencies and performs component
+    /// initialization. It should be called once when the application starts.</remarks>
     public App()
     {
-
         Services = ConfigureServices();
 
         this.InitializeComponent();
@@ -43,12 +51,20 @@ public partial class App : Application
         services.AddTransient<IFileDialogService, FileDialog>();
         services.AddSingleton<IMessageBoxService, MessageBoxService>();
         services.AddSingleton<IToolWindowService, ToolWindowService>();
-        services.AddSingleton<IWebServerCommandParser, WebServerCommandParser>();
-        services.AddSingleton<IWebServerService, WebServerService>();
+        services.AddSingleton<IMCPServer, McpService>();
 
         return services.BuildServiceProvider();
     }
 
+    /// <summary>
+    /// Handles application startup logic, including processing command-line arguments and initializing the main window
+    /// and core services.
+    /// </summary>
+    /// <remarks>If a configuration file is specified as a command-line argument, the application loads robot
+    /// parameters from that file. Otherwise, default robot configuration values are used. This method also initializes
+    /// essential services and starts the MCP web server before displaying the main window.</remarks>
+    /// <param name="e">An object that contains the event data for the startup event, including command-line arguments.</param>
+    /// <exception cref="ArgumentNullException">Thrown if a required service cannot be resolved during startup.</exception>
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -68,13 +84,13 @@ public partial class App : Application
         }
         else
         {
-            // Mast freedom 400 mm standard, 750 mm or 1160 mm options available (0 is in center)
+            // Mast freedom 400 mm standard, 750 mm or 1160 mm options available (0 is at bottom)
             // Rail Option Goes 1, Meter, 1.5 Meter or 2 Meter (0 is in Center
             var upperArmSegment = new Segment(0, 0, 225, 0, -90, 90);
             var forearmSegment = new Segment(upperArmSegment, 210, 0, -167, 167);
             var effectorSegment = new Segment(forearmSegment, 144, 0, -970, 970);
             var heightRange = new KRange(0, 400); // 40 cm  mast
-            var railRange = new KRange(-500, 500); // 1 meter rail - if no rail , then 0
+            var railRange = new KRange(-500, 500); // 1 meter rail - if no rail , then 0 (Origin is at center of Rail)
             IMessageBoxService messageBoxService = Services.GetService<IMessageBoxService>() ?? throw new ArgumentNullException(nameof(messageBoxService));
             IFileDialogService fileDialogService = Services.GetService<IFileDialogService>() ?? throw new ArgumentNullException(nameof(fileDialogService));
             IToastService toastService = Services.GetService<IToastService>() ?? throw new ArgumentNullException(nameof(toastService));
@@ -82,6 +98,11 @@ public partial class App : Application
             RobotArmViewModel robotArmViewModel = new RobotArmViewModel(
                 0, heightRange, upperArmSegment, forearmSegment, effectorSegment, messageBoxService, fileDialogService, toastService, toolWindowService);
             MainWindow = new RobotWindow(robotArmViewModel);
+            RobotMcpTool.Robot = robotArmViewModel;
+
+            // start the MCP web server
+            IMCPServer webServerService = Services.GetService<IMCPServer>() ?? throw new ArgumentNullException(nameof(webServerService));
+            webServerService.StartAsync(string.Empty).ConfigureAwait(false);
         }
 
         // Display the main window

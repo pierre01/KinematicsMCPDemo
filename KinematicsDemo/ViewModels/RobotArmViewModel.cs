@@ -57,13 +57,13 @@ public partial class RobotArmViewModel : ObservableObject
             throw new InvalidOperationException("This constructor is only for design time");
         }
 
-        _robotArmOriginPosition = new Point(_armRailPosition, _armHeightPosition);
+        RobotArmOriginPosition = new Point(ArmRailPosition, ArmHeightPosition);
 
         _upperArmSegment = new Segment(0, 0, 225, 0, -90, 90);
         _forearmSegment = new Segment(_upperArmSegment, 210, 0, -167, 167);
         _effectorSegment = new Segment(_forearmSegment, 144, 0, -970, 970);
-        _mastPositionRange = new KRange(-200, 200); // 40 cm  mast
-        _railPositionRange = new KRange(-500, 500); // 1 meter rail - if no rail , then 0
+        MastPositionRange = new KRange(-200, 200); // 40 cm  mast
+        RailPositionRange = new KRange(-500, 500); // 1 meter rail - if no rail , then 0
     }
 
     /// <summary>
@@ -105,14 +105,14 @@ public partial class RobotArmViewModel : ObservableObject
             throw new ArgumentOutOfRangeException(nameof(railPosition), $"{railPosition} is out of range");
         }
 
-        _mastPositionRange = heightRange;
-        _armMaxHeightPosition = _mastPositionRange.Max;
-        _railPositionRange = railRange;
-        _armHeightPosition = mastHeightPosition;
-        _armRailPosition = railPosition;
+        MastPositionRange = heightRange;
+        ArmMaxHeightPosition = MastPositionRange.Max;
+        RailPositionRange = railRange;
+        ArmHeightPosition = mastHeightPosition;
+        ArmRailPosition = railPosition;
         _toolWindowService = toolWindowService;
 
-        _robotArmOriginPosition = new Point(_armRailPosition, _armHeightPosition);
+        RobotArmOriginPosition = new Point(ArmRailPosition, ArmHeightPosition);
         _upperArmSegment = upperArmSegment;
         _forearmSegment = forearmSegment;
         _effectorSegment = effectorSegment;
@@ -151,13 +151,13 @@ public partial class RobotArmViewModel : ObservableObject
             throw new ArgumentOutOfRangeException(nameof(mastHeightPosition));
         }
 
-        _railPositionRange = new KRange(0, 1000); // 1 meter
-        _mastPositionRange = heightRange;
-        _armMaxHeightPosition = _mastPositionRange.Max;
-        _armHeightPosition = mastHeightPosition;
+        RailPositionRange = new KRange(0, 1000); // 1 meter
+        MastPositionRange = heightRange;
+        ArmMaxHeightPosition = MastPositionRange.Max;
+        ArmHeightPosition = mastHeightPosition;
         _toolWindowService = toolWindowService;
 
-        _robotArmOriginPosition = new Point(0, 0);
+        RobotArmOriginPosition = new Point(0, 0);
         _upperArmSegment = upperArmSegment;
         _forearmSegment = forearmSegment;
         _effectorSegment = effectorSegment;
@@ -184,14 +184,14 @@ public partial class RobotArmViewModel : ObservableObject
                              IToastService toastService, 
                              IToolWindowService toolWindowService)
     {
-        _robotArmOriginPosition = new Point(0, 0);
+        RobotArmOriginPosition = new Point(0, 0);
         _upperArmSegment = upperArmSegment;
         _forearmSegment = forearmSegment;
         _effectorSegment = effectorSegment;
         _messageBox = messageBoxService;
         _fileDialog = fileDialog;
         _toolWindowService = toolWindowService;
-        _mastPositionRange = new KRange(0, 400); // 40 cm  mast
+        MastPositionRange = new KRange(0, 400); // 40 cm  mast
         _toastService = toastService;
         MousePoint = new Point(_upperArmSegment.Length + _forearmSegment.Length + _effectorSegment.Length, 0);
         //MousePoint = DefaultRandomPoint;
@@ -203,13 +203,7 @@ public partial class RobotArmViewModel : ObservableObject
     /// If true it will Display Kinematics Skia Graphics on top of robot arm
     /// </summary>
     [ObservableProperty]
-    private bool _isShowingDetails = true;
-
-    /// <summary>
-    /// Maximum Height position on the mast (Z axis) in mm default is 400mm
-    /// </summary>
-    public double ArmMaxHeightPosition { get => _armMaxHeightPosition; set => _armMaxHeightPosition = value; }
-
+    public partial bool IsShowingDetails{ get; set; } = true;
 
     /// <summary>
     /// Mouse point on the view 
@@ -220,10 +214,10 @@ public partial class RobotArmViewModel : ObservableObject
     /// <see cref="LastSurfacePoint"/>
     /// </summary>
     [ObservableProperty]
-    private Point _mousePoint;
+    public partial Point MousePoint { get; set; }
 
     [ObservableProperty]
-    private Point _mouseCoordinates;
+    public partial Point MouseCoordinates{ get; set; }
 
     /// <summary>
     /// Origin of the arm (Shoulder Joint)
@@ -234,7 +228,7 @@ public partial class RobotArmViewModel : ObservableObject
     /// Points Recordings
     /// </summary>
     [ObservableProperty]
-    private RobotActionRecording _recordedMetaPoints = new RobotActionRecording();
+    public partial RobotActionRecording RecordedMetaPoints {get; set; } = new RobotActionRecording();
 
     /// <summary>
     /// Event trigered by the viewModel when the view needs to refresh itself
@@ -290,14 +284,14 @@ public partial class RobotArmViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ShoulderRotateCommand))]
-    private bool _isShoulderLocked;
+    public partial bool IsShoulderLocked { get; set; }
 
     /// <summary>
     /// If true the arm is moving on the joints angles delta between two points
     /// If false the arm is moving along the straight line between two points
     /// </summary>
     [ObservableProperty]
-    private bool _isMovingOnJointsDelta;
+    public partial bool IsMovingOnJointsDelta { get; set; } = false;
 
 
     /// <summary>
@@ -314,7 +308,7 @@ public partial class RobotArmViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ElbowRotateCommand))]
-    private bool _isElbowLocked;
+    public partial bool IsElbowLocked{ get; set; }
 
     /// <summary>
     /// Refresh when the elbow is locked
@@ -330,7 +324,7 @@ public partial class RobotArmViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(WristRotateCommand))]
-    private bool _isWristLocked;
+    public partial bool IsWristLocked{ get; set; }
 
     /// <summary>
     /// Refresh when the Wrist is locked
@@ -356,7 +350,7 @@ public partial class RobotArmViewModel : ObservableObject
     /// Rule: If the effector is locked the other joints are unlocked 
     /// </summary>
     [ObservableProperty]
-    private bool _isEffectorLocked;
+    public partial bool IsEffectorLocked{ get; set; }
 
     /// <summary>
     /// Refresh when the end effector point is locked   
@@ -372,13 +366,13 @@ public partial class RobotArmViewModel : ObservableObject
         Refresh?.Invoke(this, RefreshDrawingEventArgs.Empty);
     }
 
-    Point _effectorLockCenter = new Point(0, 0);
+    private Point _effectorLockCenter = new Point(0, 0);
 
     /// <summary>
     /// True if the effector is gripped
     /// </summary>
     [ObservableProperty]
-    private bool _isEffectorGripped;
+    public partial bool IsEffectorGripped{ get; set; }
 
     /// <summary>
     /// Refresh when the end effector point is locked   
@@ -404,16 +398,22 @@ public partial class RobotArmViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RobotArmOriginPosition))]
-    private double _armRailPosition;
+    public partial double ArmRailPosition{ get; set; }
 
     /// <summary>
     /// Y coordinate on the Mast (zero based)
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RobotArmOriginPosition))]
-    private double _armHeightPosition;
-    
-    private double _armMaxHeightPosition;
+    public partial double ArmHeightPosition{ get; set; }
+
+    /// <summary>
+    /// Gets or sets the maximum vertical position, in units, that the arm can reach.
+    /// </summary>
+    /// <remarks>The value represents the upper limit for the arm's height. Setting this property to a value
+    /// lower than the current arm position may restrict movement. Ensure that the value is within the supported range
+    /// of the hardware.</remarks>
+    public double ArmMaxHeightPosition{ get; set; } = 400;
 
     /// <summary>
     /// Increment of the angle in radiant
@@ -428,22 +428,22 @@ public partial class RobotArmViewModel : ObservableObject
     #region State Management
 
     [ObservableProperty]
-    private string _loadedRobotActionName = string.Empty;
+    public partial string LoadedRobotActionName { get; set;} = string.Empty;
 
     [ObservableProperty]
-    private string _loadedRobotActionDescription = string.Empty;
+    public partial string LoadedRobotActionDescription { get; set;} = string.Empty;
 
     /// <summary>
     /// Recorded points array are being recorded
     /// </summary>
     [ObservableProperty]
-    private bool _isRecording;
+    public partial bool IsRecording{ get; set; }
 
     /// <summary>
     /// Recorded points array are being played back
     /// </summary>
     [ObservableProperty]
-    private bool _isPlaying;
+    public partial bool IsPlaying{ get; set; }
 
     #endregion
 
@@ -455,19 +455,20 @@ public partial class RobotArmViewModel : ObservableObject
     /// Y=position on the mast (zero based)
     /// </summary>
     [ObservableProperty]
-    private Point _robotArmOriginPosition = new Point(0, 0);
+    public partial Point RobotArmOriginPosition { get; set;} = new Point(0, 0);
 
     /// <summary>
     /// Range of the rail position in mm (min,max) 
     /// </summary>
     [ObservableProperty]
-    private KRange? _railPositionRange;
+    public partial KRange? RailPositionRange{ get; set; }
 
     /// <summary>
     /// Range of the height position in mm (min,max) From the floor
     /// </summary>
     [ObservableProperty]
-    private KRange _mastPositionRange;
+    public partial KRange MastPositionRange{ get; set; }
+
     private IToastService _toastService;
     private IMessageBoxService _messageBox;
     private IFileDialogService _fileDialog;

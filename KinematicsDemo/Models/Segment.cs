@@ -1,7 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using SkiaSharp;
-using System;
+﻿using System;
 using System.Windows;
+using CommunityToolkit.Mvvm.ComponentModel;
+using SkiaSharp;
 
 namespace KinematicsDemo.Models;
 
@@ -15,7 +15,14 @@ public partial class Segment : ObservableObject
 
     private Point _pointA;
 
+    /// <summary>
+    /// Gets the minimum allowable angle for the Joint in degree
+    /// </summary>
     public double MinAngle { get; }
+
+    /// <summary>
+    /// Gets the maximum allowable angle for the Joint in degree
+    /// </summary>
     public double MaxAngle { get; }
 
     /// <summary>
@@ -70,7 +77,7 @@ public partial class Segment : ObservableObject
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RelativeAngle))]
-    private double _angle;
+    public partial double Angle { get; set; }
 
     /// <summary>
     /// Actual angle in degree for the segment relative to its axis
@@ -156,7 +163,7 @@ public partial class Segment : ObservableObject
         }
 
         Length = length;
-        _angle = KUtils.DegreeToRadian(initialAngle); // KUtils.DegreeToRadian(KUtils.GetClosestAngleBetweenTwoAngles( initialAngle,MinAngle,MaxAngle));
+        Angle = KUtils.DegreeToRadian(initialAngle); // KUtils.DegreeToRadian(KUtils.GetClosestAngleBetweenTwoAngles( initialAngle,MinAngle,MaxAngle));
         CalculateB();
 
     }

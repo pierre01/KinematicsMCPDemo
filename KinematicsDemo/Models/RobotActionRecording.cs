@@ -1,10 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace KinematicsDemo.Models;
 
@@ -17,23 +13,22 @@ public partial class RobotActionRecording:ObservableObject
 
     public RobotActionRecording(string name, string description)
     {
-        _name = name;
-        _description = description;
+        Name = name;
+        Description = description;
     }
 
     public RobotActionRecording()
     {
-        
     }
 
     [ObservableProperty]
-    string? _name;
+    public partial string? Name{ get;set;}
 
     [ObservableProperty]
-    string? _description;
+    public partial string? Description { get;set; }
 
     [ObservableProperty]
-    ObservableCollection<MetaPoint> _points = new ObservableCollection<MetaPoint>();
+    public partial ObservableCollection<MetaPoint> Points { get;set;} = new ObservableCollection<MetaPoint>();
 
     public void Add(MetaPoint metaPoint)
     {

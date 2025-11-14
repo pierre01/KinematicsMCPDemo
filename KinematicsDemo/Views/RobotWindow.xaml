@@ -10,7 +10,7 @@
     xmlns:UserControls="clr-namespace:KinematicsDemo.UserControls" x:Name="window"
     x:Class="KinematicsDemo.Views.RobotWindow"
     Title="{Binding LoadedRobotActionName, StringFormat=Robot window - \{0\}}"
-    Width="1400"
+    Width="1710"
     Height="1073"
     d:DataContext="{d:DesignInstance {x:Type viewmodels:RobotArmViewModel}}"
     Icon="/AppIcon.ico"
@@ -25,15 +25,9 @@
             Modifiers="Control" />
     </Window.InputBindings>
     <Grid>
-        <Canvas x:Name="WorkCellCanvas" ClipToBounds="False">
-            <Grid x:Name="WorkCellGrid" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Center" Height="739" Canvas.Left="-150" Canvas.Top="-51" VerticalAlignment="Top">
-                <Grid.RenderTransform>
-                    <TransformGroup>
-                        <SkewTransform/>
-                        <RotateTransform/>
-                        <TranslateTransform X="{Binding ArmRailPosition}"/>
-                    </TransformGroup>
-                </Grid.RenderTransform>
+        <Canvas x:Name="WorkCellCanvas" ClipToBounds="False" Margin="20,0,0,0">
+            <Grid x:Name="WorkCellGrid" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Center" Height="739"  Canvas.Top="-51" VerticalAlignment="Top">
+
                 <Rectangle
                     x:Name="RailRectangle"
                     StrokeDashArray="4 4"
@@ -54,7 +48,7 @@
             </Grid>
             <Canvas
                 x:Name="RobotArmCanvas"
-                Canvas.Left="250"
+                Canvas.Left="551"
                 Canvas.Top="332"
                 ClipToBounds="False"
                 IsHitTestVisible="True" Panel.ZIndex="1">
@@ -559,5 +553,11 @@
             </StackPanel>
         </Border>
         <UserControls:HeightIndicator x:Name="RobotHeightIndicator" HorizontalAlignment="Left" Margin="0,664,0,0" VerticalAlignment="Top"  Width="457"  ArmHeight="{Binding ArmHeightPosition,Mode=OneWay}" Height="351" MaxArmHeight="{Binding ArmMaxHeightPosition}" />
+        <Label Content="Left" HorizontalAlignment="Left" Height="49" Margin="753,60,0,0" VerticalAlignment="Top" Width="147" FontFamily="Segoe UI Black" Foreground="#FF8DC63F" FontSize="24"/>
+        <Label Content="Right" HorizontalAlignment="Left" Height="49" Margin="732,735,0,0" VerticalAlignment="Top" Width="147" FontFamily="Segoe UI Black" Foreground="#FF8DC63F" FontSize="24"/>
+        <Label Content="Rail Back" HorizontalAlignment="Left" Height="49" Margin="55,375,0,0" VerticalAlignment="Top" Width="147" FontFamily="Segoe UI Black" Foreground="Purple" FontSize="24"/>
+        <Label Content="Rail Forward" HorizontalAlignment="Left" Height="49" Margin="1228,378,0,0" VerticalAlignment="Top" Width="147" FontFamily="Segoe UI Black" Foreground="Purple" FontSize="24"/>
+        <Label Content="Extend" HorizontalAlignment="Left" Height="49" Margin="1112,228,0,0" VerticalAlignment="Top" Width="147" FontFamily="Segoe UI Black" Foreground="#FFF0513F" FontSize="24"/>
+        <Label Content="Retract" HorizontalAlignment="Left" Height="49" Margin="614,226,0,0" VerticalAlignment="Top" Width="147" FontFamily="Segoe UI Black" Foreground="#FFF0513F" FontSize="24"/>
     </Grid>
 </Window>
