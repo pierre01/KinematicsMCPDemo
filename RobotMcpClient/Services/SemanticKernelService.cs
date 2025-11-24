@@ -207,6 +207,10 @@ public class SemanticKernelService : ISemanticKernelService
 
             stopwatch.Stop();
 
+            var toolTimeMs = FunctionInvocationFilter.ConsumeToolTimeMs();
+            var llmTimeMs = stopwatch.ElapsedMilliseconds - toolTimeMs;
+            if (llmTimeMs < 1) llmTimeMs = stopwatch.ElapsedMilliseconds; // fallback
+
 
             response.Result = result.ToString();
 
@@ -229,11 +233,11 @@ public class SemanticKernelService : ISemanticKernelService
                 response.RequestTokens = totalTokens;
 
                 // ===== Tokens per Second =====
-                response.GenerationMilliseconds = stopwatch.ElapsedMilliseconds;
-                if (outputTokens > 0)
+                response.GenerationMilliseconds = llmTimeMs;
+                if (outputTokens > 0 && llmTimeMs > 0)
                 {
                     response.TokensPerSecond =
-                        outputTokens / (stopwatch.ElapsedMilliseconds / 1000.0);
+                        totalTokens / (llmTimeMs / 1000.0);
                 }
             }
 
@@ -254,8 +258,20 @@ public class SemanticKernelService : ISemanticKernelService
 /// </summary>
 public sealed class FunctionInvocationFilter : IFunctionInvocationFilter
 {
+    // Accumulates tool time per async flow
+    private static readonly AsyncLocal<long> _toolTimeMs = new();
+
+    // Helper so your service can access and reset it
+    public static long ConsumeToolTimeMs()
+    {
+        var value = _toolTimeMs.Value;
+        _toolTimeMs.Value = 0;
+        return value;
+    }
+
     public async Task OnFunctionInvocationAsync(FunctionInvocationContext context, Func<FunctionInvocationContext, Task> next)
     {
+        var sw = Stopwatch.StartNew();
         try
         {
             Debug.WriteLine($"Function {context.Function.Name} is about to be invoked.");
@@ -264,10 +280,13 @@ public sealed class FunctionInvocationFilter : IFunctionInvocationFilter
         }
         catch (Exception ex)
         {
-            // Log the exception for diagnostics, but do not rethrow
             Debug.WriteLine($"Exception during function invocation: {ex}");
-            // Optionally, you could add more sophisticated logging here
+        }
+        finally
+        {
+            sw.Stop();
+            _toolTimeMs.Value = _toolTimeMs.Value + sw.ElapsedMilliseconds;
         }
     }
-
 }
+
