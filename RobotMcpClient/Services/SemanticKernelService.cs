@@ -43,7 +43,7 @@ public class SemanticKernelService : ISemanticKernelService
 #pragma warning restore SKEXP0001
 
             // If you keep cloud as an option, set useLocal = true/false to toggle
-            var useLocal = false;
+            var useLocal = true;
 
             _builder = Kernel.CreateBuilder();
             string serviceID = "LocalGPT";
@@ -81,13 +81,13 @@ public class SemanticKernelService : ISemanticKernelService
 
                 var httpsClient = new HttpClient(handler)
                 {
-                    BaseAddress = new Uri("https://localhost:8443/v1")
+                    BaseAddress = new Uri("http://127.0.0.1:8931/v1")
                 };
 
                 // Register the local vLLM endpoint with Semantic Kernel
                 _builder.AddOpenAIChatCompletion(
                     apiKey: "local-key",
-                    modelId: "gpt-oss-20b",            // must match --served-model-name
+                    modelId: "openai/gpt-oss-20b",            // must match --served-model-name
                     orgId: null,
                     serviceId: serviceID,
                     httpClient: httpsClient
@@ -105,7 +105,7 @@ public class SemanticKernelService : ISemanticKernelService
                 // This is the key line – lets the model pick functions
                ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
 
-                MaxTokens = 1024  
+                MaxTokens = 4096
             };
 #pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
@@ -198,15 +198,23 @@ public class SemanticKernelService : ISemanticKernelService
                 return response;
             }
 
+            var stopwatch = Stopwatch.StartNew();
+
             ChatMessageContent result = await _chatCompletionService.GetChatMessageContentAsync(
                 _history,
                 executionSettings: _openAIPromptExecutionSettings,
                 kernel: _kernel);
 
+            stopwatch.Stop();
+
+
             response.Result = result.ToString();
 
             // Token accounting (OpenAI connector metadata)
-            if (result.Metadata != null && result.Metadata.TryGetValue("Usage", out var usageObj) && usageObj is OpenAI.Chat.ChatTokenUsage usage)
+            // Token accounting
+            if (result.Metadata != null &&
+                result.Metadata.TryGetValue("Usage", out var usageObj) &&
+                usageObj is OpenAI.Chat.ChatTokenUsage usage)
             {
                 var totalTokens = usage.TotalTokenCount;
                 var inputTokens = usage.InputTokenCount - _lastTotalTokens;
@@ -219,6 +227,14 @@ public class SemanticKernelService : ISemanticKernelService
                 response.OutputTokens = outputTokens;
                 response.TotalTokens = _totalTokens;
                 response.RequestTokens = totalTokens;
+
+                // ===== Tokens per Second =====
+                response.GenerationMilliseconds = stopwatch.ElapsedMilliseconds;
+                if (outputTokens > 0)
+                {
+                    response.TokensPerSecond =
+                        outputTokens / (stopwatch.ElapsedMilliseconds / 1000.0);
+                }
             }
 
             response.IsSuccess = true;

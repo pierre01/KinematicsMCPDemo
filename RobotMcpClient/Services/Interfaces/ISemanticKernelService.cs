@@ -20,4 +20,7 @@ public class KernelPluginResult
     public int OutputTokens { get; set; }
     public int TotalTokens { get; set; }
     public int RequestTokens { get; set; }
+    public double TokensPerSecond { get; set; }
+    public long GenerationMilliseconds { get; set; }
+
 }
