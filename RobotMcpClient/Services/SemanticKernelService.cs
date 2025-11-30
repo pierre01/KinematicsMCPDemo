@@ -23,9 +23,7 @@ public class SemanticKernelService : ISemanticKernelService
     private IChatCompletionService? _chatCompletionService;
     private OpenAIPromptExecutionSettings? _openAIPromptExecutionSettings;
 
-#pragma warning disable SKEXP0001
     private IChatHistoryReducer _reducer;
-#pragma warning restore SKEXP0001
 
     /// <summary>
     /// Initialize SK, OpenAI, and attach MCP tools from Lights.McpServer.
@@ -38,12 +36,10 @@ public class SemanticKernelService : ISemanticKernelService
             //Wait 10 seconds before initializing the kernel to allow time for the MCP server to start
             await Task.Delay(10000);
 
-#pragma warning disable SKEXP0001
             _reducer = new ChatHistoryTruncationReducer(targetCount: 4, thresholdCount: 6);
-#pragma warning restore SKEXP0001
 
             // If you keep cloud as an option, set useLocal = true/false to toggle
-            var useLocal = true;
+            var useLocal = false;
 
             _builder = Kernel.CreateBuilder();
             string serviceID = "LocalGPT";
@@ -98,7 +94,6 @@ public class SemanticKernelService : ISemanticKernelService
 
 
             // Let the model auto-invoke MCP tools when helpful
-#pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
             _openAIPromptExecutionSettings = new()
             {
                 Temperature = 1,
@@ -107,7 +102,6 @@ public class SemanticKernelService : ISemanticKernelService
 
                 MaxTokens = 4096
             };
-#pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
             _kernel = _builder.Build();
 
@@ -236,8 +230,8 @@ public class SemanticKernelService : ISemanticKernelService
                 response.GenerationMilliseconds = llmTimeMs;
                 if (outputTokens > 0 && llmTimeMs > 0)
                 {
-                    response.TokensPerSecond =
-                        totalTokens / (llmTimeMs / 1000.0);
+                    response.PipelineTokensPerSecond =
+                        (outputTokens + inputTokens) / (llmTimeMs / 1000.0);
                 }
             }
 

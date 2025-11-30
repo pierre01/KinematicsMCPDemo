@@ -170,7 +170,7 @@ public partial class MainPageViewModel : ObservableObject
             RequestTokens = result.RequestTokens;
             InputTokens = result.InputTokens;
             OutputTokens = result.OutputTokens;
-            TokensPerSecond = result.TokensPerSecond;
+            TokensPerSecond = result.PipelineTokensPerSecond;
             GenerationMilliseconds = result.GenerationMilliseconds;
         }
         else
