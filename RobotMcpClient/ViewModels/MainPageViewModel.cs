@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RobotMcpClient.Services.Interfaces;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace RobotMcpClient.ViewModels;
 
@@ -33,6 +34,7 @@ public partial class MainPageViewModel : ObservableObject
 
     private bool _isListening = false;
     private bool _isSpeechEnabled = false;
+    private ConfiguredTaskAwaitable _avaitingTask;
 
     public MainPageViewModel(ISpeechToText speechToText, IDialogService dialogService, ISemanticKernelService semanticKernelService)
     {
@@ -40,7 +42,12 @@ public partial class MainPageViewModel : ObservableObject
         _dialogService = dialogService;
         _semanticKernelService = semanticKernelService;
 
-        _semanticKernelService.InitializeKernelAndPluginAsync().ConfigureAwait(true);
+        _avaitingTask =  _semanticKernelService.InitializeKernelAndPluginAsync().ConfigureAwait(true);
+        _avaitingTask.GetAwaiter().OnCompleted(() =>
+        {
+            IsProgressVisible = false;
+            
+        });
     }
 
 
@@ -60,7 +67,8 @@ public partial class MainPageViewModel : ObservableObject
     public partial int InputTokens { get; set; }
 
     [ObservableProperty]
-    public partial bool IsProgressVisible { get; set; }
+    [NotifyCanExecuteChangedFor(nameof(SendRequestCommand))]
+    public partial bool IsProgressVisible { get; set; } =true;
 
     [ObservableProperty]
     public partial int OutputTokens { get; set; }
@@ -75,13 +83,19 @@ public partial class MainPageViewModel : ObservableObject
     public partial string ButtonImage { get; set; } = "microphone_off.png";
 
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanSendRequest)) ]
     private async Task SendRequest()
     {
         IsProgressVisible = true;
         await GetResponseAsync(CallTextInput);
         IsProgressVisible = false;
     }
+
+    private bool CanSendRequest()
+    {
+        return !IsProgressVisible;
+    }
+
 
     [RelayCommand]
     private void NextPrompt()
@@ -93,6 +107,8 @@ public partial class MainPageViewModel : ObservableObject
         }
         CallTextInput = _userPrompts[_promptIndex];
     }
+
+    
 
     [RelayCommand]
     private void PreviousPrompt()

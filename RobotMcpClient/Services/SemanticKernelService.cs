@@ -36,10 +36,11 @@ public class SemanticKernelService : ISemanticKernelService
             //Wait 10 seconds before initializing the kernel to allow time for the MCP server to start
             await Task.Delay(10000);
 
-            _reducer = new ChatHistoryTruncationReducer(targetCount: 4, thresholdCount: 6);
-
             // If you keep cloud as an option, set useLocal = true/false to toggle
-            var useLocal = false;
+            var useLocal = true;
+
+            _reducer = new ChatHistoryTruncationReducer(targetCount: 40, thresholdCount: 60);
+
 
             _builder = Kernel.CreateBuilder();
             string serviceID = "LocalGPT";
