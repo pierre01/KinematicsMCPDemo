@@ -23,9 +23,10 @@ public class SemanticKernelService : ISemanticKernelService
     private IChatCompletionService? _chatCompletionService;
     private OpenAIPromptExecutionSettings? _openAIPromptExecutionSettings;
 
-#pragma warning disable SKEXP0001
     private IChatHistoryReducer _reducer;
-#pragma warning restore SKEXP0001
+
+    private int _lastTotalTokens = 0;
+    private int _totalTokens = 0;
 
     /// <summary>
     /// Initialize SK, OpenAI, and attach MCP tools from Lights.McpServer.
@@ -38,12 +39,11 @@ public class SemanticKernelService : ISemanticKernelService
             //Wait 10 seconds before initializing the kernel to allow time for the MCP server to start
             await Task.Delay(10000);
 
-#pragma warning disable SKEXP0001
-            _reducer = new ChatHistoryTruncationReducer(targetCount: 4, thresholdCount: 6);
-#pragma warning restore SKEXP0001
-
             // If you keep cloud as an option, set useLocal = true/false to toggle
             var useLocal = true;
+
+            _reducer = new ChatHistoryTruncationReducer(targetCount: 40, thresholdCount: 60);
+
 
             _builder = Kernel.CreateBuilder();
             string serviceID = "LocalGPT";
@@ -97,17 +97,23 @@ public class SemanticKernelService : ISemanticKernelService
             }
 
 
-            // Let the model auto-invoke MCP tools when helpful
-#pragma warning disable SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            // ===== Prompt execution settings =====
+            // Optimized for robot control with tool use
             _openAIPromptExecutionSettings = new()
             {
-                Temperature = 1,
-                // This is the key line – lets the model pick functions
-               ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
+                Temperature = 0.15,
+                TopP = 0.4,
+                FrequencyPenalty = 0,
+                PresencePenalty = 0, 
+                //ReasoningEffort = "minimal",
 
-                MaxTokens = 4096
+                // This is the key line – lets the model pick functions
+                ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
+
+                // Low MaxTokens does not reduce tool-call reliability.
+                // MaxTokens reduces natural-language verbosity — nothing else.
+                MaxTokens = 256
             };
-#pragma warning restore SKEXP0001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
             _kernel = _builder.Build();
 
@@ -133,8 +139,6 @@ public class SemanticKernelService : ISemanticKernelService
         }
     }
 
-    private int _lastTotalTokens = 0;
-    private int _totalTokens = 0;
 
     public async Task HomeRobot()
     {
@@ -207,6 +211,10 @@ public class SemanticKernelService : ISemanticKernelService
 
             stopwatch.Stop();
 
+            var toolTimeMs = FunctionInvocationFilter.ConsumeToolTimeMs();
+            var llmTimeMs = stopwatch.ElapsedMilliseconds - toolTimeMs;
+            if (llmTimeMs < 1) llmTimeMs = stopwatch.ElapsedMilliseconds; // fallback
+
 
             response.Result = result.ToString();
 
@@ -229,11 +237,11 @@ public class SemanticKernelService : ISemanticKernelService
                 response.RequestTokens = totalTokens;
 
                 // ===== Tokens per Second =====
-                response.GenerationMilliseconds = stopwatch.ElapsedMilliseconds;
-                if (outputTokens > 0)
+                response.GenerationMilliseconds = llmTimeMs;
+                if (outputTokens > 0 && llmTimeMs > 0)
                 {
-                    response.TokensPerSecond =
-                        outputTokens / (stopwatch.ElapsedMilliseconds / 1000.0);
+                    response.PipelineTokensPerSecond =
+                        (outputTokens + inputTokens) / (llmTimeMs / 1000.0);
                 }
             }
 
@@ -254,8 +262,20 @@ public class SemanticKernelService : ISemanticKernelService
 /// </summary>
 public sealed class FunctionInvocationFilter : IFunctionInvocationFilter
 {
+    // Accumulates tool time per async flow
+    private static readonly AsyncLocal<long> _toolTimeMs = new();
+
+    // Helper so your service can access and reset it
+    public static long ConsumeToolTimeMs()
+    {
+        var value = _toolTimeMs.Value;
+        _toolTimeMs.Value = 0;
+        return value;
+    }
+
     public async Task OnFunctionInvocationAsync(FunctionInvocationContext context, Func<FunctionInvocationContext, Task> next)
     {
+        var sw = Stopwatch.StartNew();
         try
         {
             Debug.WriteLine($"Function {context.Function.Name} is about to be invoked.");
@@ -264,10 +284,13 @@ public sealed class FunctionInvocationFilter : IFunctionInvocationFilter
         }
         catch (Exception ex)
         {
-            // Log the exception for diagnostics, but do not rethrow
             Debug.WriteLine($"Exception during function invocation: {ex}");
-            // Optionally, you could add more sophisticated logging here
+        }
+        finally
+        {
+            sw.Stop();
+            _toolTimeMs.Value = _toolTimeMs.Value + sw.ElapsedMilliseconds;
         }
     }
-
 }
+
