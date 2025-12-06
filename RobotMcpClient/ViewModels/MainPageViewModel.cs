@@ -16,6 +16,7 @@ public partial class MainPageViewModel : ObservableObject
                 "Move left by 5cm",
                 "Retract arm by 2 inches",
                 "Retract arm by 2 inches and up by 24mm",
+                "Go backwards by 30 cm",
                 "Remember when I say 'Square(U)' the parameter of the function Square: U is the unit in centimeter, you must then do the following instructions:  Record position, then retract arm by U, then Record position, then move right by U, then Record position, then extend arm by U, then Record Position, then move left by U, then Record Position.",
                 "Square(15)",
                 "Play",
@@ -24,7 +25,7 @@ public partial class MainPageViewModel : ObservableObject
                 "Go down by 10cm",
                 "Go Home",
                 "Where are you?",
-                "Move south by 5cm and east by 5cm",
+                "Move right by 5cm and extend by 5cm",
         ];
 
     //Voice Handling

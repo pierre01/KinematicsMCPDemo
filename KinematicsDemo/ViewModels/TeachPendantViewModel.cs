@@ -163,7 +163,7 @@ namespace KinematicsDemo.ViewModels
         /// Move effector to the north
         /// </summary>
         [RelayCommand]
-        public void GoNorth()
+        public void GoLeft()
         {
             var m = _robotViewModel.LastSurfacePoint;
             m.Y -= StepPrecision;
@@ -175,7 +175,7 @@ namespace KinematicsDemo.ViewModels
         /// Move effector to the south
         /// </summary>
         [RelayCommand]
-        public void GoSouth()
+        public void GoRight()
         {
             var m = _robotViewModel.LastSurfacePoint;
             m.Y += StepPrecision;
@@ -187,7 +187,7 @@ namespace KinematicsDemo.ViewModels
         /// Move effector to the west
         /// </summary>
         [RelayCommand]
-        public void GoWest()
+        public void Retract()
         {
             var m = _robotViewModel.LastSurfacePoint;
             m.X -= StepPrecision;
@@ -199,7 +199,7 @@ namespace KinematicsDemo.ViewModels
         /// Move effector to the east
         /// </summary>
         [RelayCommand]
-        public void GoEast()
+        public void Extend()
         {
             var m = _robotViewModel.LastSurfacePoint;
             m.X += StepPrecision;
