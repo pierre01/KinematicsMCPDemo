@@ -25,6 +25,9 @@ public class SemanticKernelService : ISemanticKernelService
 
     private IChatHistoryReducer _reducer;
 
+    private int _lastTotalTokens = 0;
+    private int _totalTokens = 0;
+
     /// <summary>
     /// Initialize SK, OpenAI, and attach MCP tools from Lights.McpServer.
     /// </summary>
@@ -94,14 +97,22 @@ public class SemanticKernelService : ISemanticKernelService
             }
 
 
-            // Let the model auto-invoke MCP tools when helpful
+            // ===== Prompt execution settings =====
+            // Optimized for robot control with tool use
             _openAIPromptExecutionSettings = new()
             {
-                Temperature = 1,
-                // This is the key line – lets the model pick functions
-               ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
+                Temperature = 0.15,
+                TopP = 0.4,
+                FrequencyPenalty = 0,
+                PresencePenalty = 0, 
+                //ReasoningEffort = "minimal",
 
-                MaxTokens = 4096
+                // This is the key line – lets the model pick functions
+                ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
+
+                // Low MaxTokens does not reduce tool-call reliability.
+                // MaxTokens reduces natural-language verbosity — nothing else.
+                MaxTokens = 256
             };
 
             _kernel = _builder.Build();
@@ -128,8 +139,6 @@ public class SemanticKernelService : ISemanticKernelService
         }
     }
 
-    private int _lastTotalTokens = 0;
-    private int _totalTokens = 0;
 
     public async Task HomeRobot()
     {
