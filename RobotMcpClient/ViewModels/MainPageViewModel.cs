@@ -167,14 +167,14 @@ public partial class MainPageViewModel : ObservableObject
         _speechToText.RecognitionResultCompleted -= OnRecognitionTextCompleted;
     }
 
-    void OnRecognitionTextUpdated(object sender, SpeechToTextRecognitionResultUpdatedEventArgs args)
+    void OnRecognitionTextUpdated(object? sender, SpeechToTextRecognitionResultUpdatedEventArgs args)
     {
         CallTextInput += args.RecognitionResult;
     }
 
-    void OnRecognitionTextCompleted(object sender, SpeechToTextRecognitionResultCompletedEventArgs args)
+    void OnRecognitionTextCompleted(object? sender, SpeechToTextRecognitionResultCompletedEventArgs args)
     {
-        CallTextInput = args.RecognitionResult.Text;
+        CallTextInput = args.RecognitionResult.Text ?? string.Empty;
     }
     #endregion
 

@@ -12,22 +12,45 @@ namespace KinematicsDemo.Services.ToastService;
 /// </summary>
 public partial class ToastAlert : UserControl
 {
-    public event EventHandler Closed;
-    private Brush _badgeBorderBrush;
-    private Brush _badgeFillBrush;
-    private Brush _badgeTextBrush;
-    private string _text;
+    public event EventHandler? Closed;
+
+    private Brush _badgeBorderBrush = Brushes.Transparent;
+    private Brush _badgeFillBrush = Brushes.Transparent;
+    private Brush _badgeTextBrush = Brushes.Transparent;
+    private string _text = string.Empty;
     private bool _showCloseButton;
     private int _timeout;
-    private Timer _timeoutTimer;
+    private Timer? _timeoutTimer;
 
-    public Brush BadgeBorderBrush { get => _badgeBorderBrush; set { _badgeBorderBrush = value; ToastBorder.BorderBrush = value; } }
-    public Brush BadgeFillBrush { get => _badgeFillBrush; set { _badgeFillBrush = value; ToastBorder.Background = value; } }
-    public Brush BadgeTextBrush { get => _badgeTextBrush; set { _badgeTextBrush = value; ToastText.Foreground = value; } }
+    public Brush BadgeBorderBrush
+    {
+        get => _badgeBorderBrush; set { _badgeBorderBrush = value; ToastBorder.BorderBrush = value; }
+    }
 
-    public string Text { get => _text; set { _text = value; ToastText.Text = _text; } }
-    public int ToastTimeout { get => _timeout; set { _timeout = value; } }
-    public bool ShowCloseButton { get => _showCloseButton; set { _showCloseButton = value; CloseButton.Visibility = value == false ? Visibility.Collapsed : Visibility.Visible; SeparatorRect.Visibility = value == false ? Visibility.Collapsed : Visibility.Visible; } }
+    public Brush BadgeFillBrush
+    {
+        get => _badgeFillBrush; set { _badgeFillBrush = value; ToastBorder.Background = value; }
+    }
+
+    public Brush BadgeTextBrush
+    {
+        get => _badgeTextBrush; set { _badgeTextBrush = value; ToastText.Foreground = value; }
+    }
+
+    public string Text
+    {
+        get => _text; set { _text = value; ToastText.Text = _text; }
+    }
+
+    public int ToastTimeout
+    {
+        get => _timeout; set { _timeout = value; }
+    }
+
+    public bool ShowCloseButton
+    {
+        get => _showCloseButton; set { _showCloseButton = value; CloseButton.Visibility = value == false ? Visibility.Collapsed : Visibility.Visible; SeparatorRect.Visibility = value == false ? Visibility.Collapsed : Visibility.Visible; }
+    }
 
     public ToastAlert(string message, BadgeTypeEnum badgeType, int timeout, bool isClosable, bool isListVisualReversed=true)
     {
@@ -91,6 +114,7 @@ public partial class ToastAlert : UserControl
                 BadgeTextBrush = new SolidColorBrush((Color)FindResource("StaticBlue600"));
                 break;
         }
+
         Text = message;
         ShowCloseButton = isClosable;
         ToastTimeout = timeout;
@@ -111,20 +135,18 @@ public partial class ToastAlert : UserControl
     private void OnToastLoaded(object sender, RoutedEventArgs e)
     {
         _timeoutTimer = new Timer(TimeoutCallback, null, ToastTimeout * 1000, Timeout.Infinite);
-
     }
 
-    private void TimeoutCallback(object state)
+    private void TimeoutCallback(object? state)
     {
         Dispatcher.Invoke(() =>
         {
-            if (Closed != null) Closed(this, EventArgs.Empty);
+            Closed?.Invoke(this, EventArgs.Empty);
         });
-
     }
 
     private void Path_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (Closed != null) Closed(this, e);
+        Closed?.Invoke(this, e);
     }
 }

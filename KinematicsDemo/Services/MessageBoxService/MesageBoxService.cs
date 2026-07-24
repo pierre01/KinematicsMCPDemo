@@ -4,11 +4,10 @@ namespace KinematicsDemo.Services.MessageBoxService;
 
 public class MessageBoxService : IMessageBoxService
 {
-
     public MessageBoxService()
     {
-
     }
+
     /// <summary>
     /// Display a simple MessageBox with a OK button
     /// </summary>
@@ -16,10 +15,8 @@ public class MessageBoxService : IMessageBoxService
     /// <returns>MessageBoxServiceResult.OK</returns>
     public MessageBoxServiceResult Show(string messageBoxText)
     {
-        return Show(messageBoxText, "");
-
+        return Show(messageBoxText, string.Empty);
     }
-
 
     /// <summary>
     /// Display a simple MessageBox with a OK button
@@ -63,7 +60,6 @@ public class MessageBoxService : IMessageBoxService
         return dlg.Result;
     }
 
-
     /// <summary>
     ///    Displays a message box that has a message, title bar caption, button, and icon;
     ///     and that accepts a default message box result, complies with the specified options,
@@ -84,8 +80,6 @@ public class MessageBoxService : IMessageBoxService
         return dlg.Result;
     }
 
-
-
     /// <summary>
     /// Displays a message box in front of the specified window. The message box displays
     /// a message and returns a result.
@@ -101,6 +95,7 @@ public class MessageBoxService : IMessageBoxService
             dlg.Owner = owner;
             dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         }
+
         dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         var res = dlg.ShowDialog();
 
@@ -123,6 +118,7 @@ public class MessageBoxService : IMessageBoxService
             dlg.Owner = owner;
             dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         }
+
         dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         var res = dlg.ShowDialog();
 
@@ -146,6 +142,7 @@ public class MessageBoxService : IMessageBoxService
             dlg.Owner = owner;
             dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         }
+
         dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         var res = dlg.ShowDialog();
 
@@ -170,6 +167,7 @@ public class MessageBoxService : IMessageBoxService
             dlg.Owner = owner;
             dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         }
+
         dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         var res = dlg.ShowDialog();
 
@@ -195,10 +193,10 @@ public class MessageBoxService : IMessageBoxService
             dlg.Owner = owner;
             dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         }
+
         dlg.WindowStartupLocation = WindowStartupLocation.CenterOwner;
         var res = dlg.ShowDialog();
 
         return dlg.Result;
     }
-
 }

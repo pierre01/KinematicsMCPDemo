@@ -57,7 +57,6 @@ public static class KUtils
     /// <returns>true if clockwise</returns>
     public static bool IsDirectionBetweenTwoAnglesClockwise(double angleA, double angleB)
     {
-
         if (angleA > 0 && angleB > 0)
         {
             return angleB - angleA > 0 ? false : true;
@@ -94,7 +93,6 @@ public static class KUtils
     /// <returns>true if clockwise</returns>
     public static bool IsDirectionBetweenTwoAnglesClockwise2(double startAngle, double endAngle)
     {
-
         if (startAngle > 0 && endAngle > 0)
         {
             return endAngle - startAngle > 0 ? false : true;
@@ -121,7 +119,6 @@ public static class KUtils
         return true;
     }
 
-
     // calculate if the direction between two points on a circle is clockwise or not
     public static bool IsDirectionBetweenTwoPointsOnCircleClockwise(Point A, Point B, Point center)
     {
@@ -143,7 +140,6 @@ public static class KUtils
         return Math.Atan2(a.Y - center.Y, a.X - center.X) * (180 / Math.PI);
     }
 
-
     /// <summary>
     /// Create a list of x angleSteps between two angles ]angle1,angle2]
     /// </summary>
@@ -161,9 +157,10 @@ public static class KUtils
         var atoBAngle = KUtils.GetAngleInBetweenAandB(angle1, angle2);
         double sign = IsDirectionBetweenTwoAnglesClockwise(angle1, angle2) ? -1 : 1;
         Debug.WriteLine($"-----------  angle1:{angle1} angle2:{angle2} Sign:{sign}");
+
         //Starts at the last position from the latst steps
         var angleSteps = new List<double>();
-        double stepDistance = (atoBAngle) / steps;
+        double stepDistance = atoBAngle / steps;
 
         stepDistance = Math.Abs(stepDistance);
         _lastStepInList = angle1; // Smooth the distance between the steps
@@ -175,6 +172,7 @@ public static class KUtils
             angleSteps.Add(newAngle);
             _lastStepInList = angleSteps.Last();
         }
+
         return angleSteps;
     }
 
@@ -226,7 +224,10 @@ public static class KUtils
     /// </returns>
     public static double GetClosestAngleBetweenTwoAngles(double angleInRadian, double angleMin, double angleMax)
     {
-        if (angleMin > angleMax) { throw new ArgumentException("angleMin must be smaller than angleMax"); }
+        if (angleMin > angleMax)
+        {
+            throw new ArgumentException("angleMin must be smaller than angleMax");
+        }
 
         // convert radian to Degree
         double angleInDegree = angleInRadian * 180 / Math.PI;
@@ -257,7 +258,10 @@ public static class KUtils
     /// </returns>
     public static double GetClosestAngleBetweenTwoAngles2(double angleInRadian, double angleMin, double angleMax)
     {
-        if (angleMin > angleMax) { throw new ArgumentException("angleMin must be smaller than angleMax"); }
+        if (angleMin > angleMax)
+        {
+            throw new ArgumentException("angleMin must be smaller than angleMax");
+        }
 
         // convert radian to Degree
         double angleInDegree = angleInRadian * 180 / Math.PI;
@@ -396,7 +400,6 @@ public static class KUtils
     /// <exception cref="ArgumentException">If the point to search is the same as the center</exception>
     public static Point ClosestPointOnCircumference(Point pointA, Point center, double radius)
     {
-        #region Check for Exceptions
         // Check if the radius is less than 0
         if (radius < 0)
         {
@@ -413,7 +416,6 @@ public static class KUtils
         {
             throw new ArgumentException("Point to search cannot be the same as the center", nameof(pointA));
         }
-        #endregion
 
         // Determine the vector from center to pointA
         Vector vectorAC = pointA - center;
@@ -425,11 +427,10 @@ public static class KUtils
         Vector directionAC = vectorAC / distanceAC;
 
         // Determine the closest point on the circumference of the circle to pointA.
-        Point closestPoint = center + radius * directionAC;
+        Point closestPoint = center + (radius * directionAC);
 
         return closestPoint;
     }
-
 
     /// <summary>
     /// Calculates the intersection between a plane and a circle in 3D space. The method takes in parameters x, y, and z. Inside the method, there are hardcoded values for the circle's center x0=1.0, y0=2.0, z0=3.0, and the circle's radius r=4.0. 
@@ -451,12 +452,12 @@ public static class KUtils
         double D = 4.0;
 
         // Calculate the coefficients of the quadratic equation in x and y
-        double a = A * A + B * B + C * C;
-        double b = 2 * (A * x0 + B * y0 + C * z0 - A * C * x - B * C * y - C * D);
-        double c = x0 * x0 + y0 * y0 + z0 * z0 - 2 * z0 * D + D * D - r * r * C * C + B * B * y * y + C * C * z * z - 2 * B * y0 * y - 2 * C * z0 * z;
+        double a = (A * A) + (B * B) + (C * C);
+        double b = 2 * ((A * x0) + (B * y0) + (C * z0) - (A * C * x) - (B * C * y) - (C * D));
+        double c = (x0 * x0) + (y0 * y0) + (z0 * z0) - (2 * z0 * D) + (D * D) - (r * r * C * C) + (B * B * y * y) + (C * C * z * z) - (2 * B * y0 * y) - (2 * C * z0 * z);
 
         // Calculate the discriminant of the quadratic equation
-        double discriminant = b * b - 4 * a * c;
+        double discriminant = (b * b) - (4 * a * c);
 
         if (discriminant < 0)
         {
@@ -467,20 +468,20 @@ public static class KUtils
         {
             // One solution, the circle is tangent to the plane at this point
             x = -b / (2 * a);
-            y = (-A * x - D) / B;
-            z = (-A * x - B * y - D) / C;
+            y = ((-A * x) - D) / B;
+            z = ((-A * x) - (B * y) - D) / C;
             Console.WriteLine($"Intersection at ({x}, {y}, {z})");
         }
         else
         {
             // Two solutions, choose the one that is closest to the center of the circle
             double x1 = (-b + Math.Sqrt(discriminant)) / (2 * a);
-            double y1 = (-A * x1 - D) / B;
-            double z1 = (-A * x1 - B * y1 - D) / C;
+            double y1 = ((-A * x1) - D) / B;
+            double z1 = ((-A * x1) - (B * y1) - D) / C;
 
             double x2 = (-b - Math.Sqrt(discriminant)) / (2 * a);
-            double y2 = (-A * x2 - D) / B;
-            double z2 = (-A * x2 - B * y2 - D) / C;
+            double y2 = ((-A * x2) - D) / B;
+            double z2 = ((-A * x2) - (B * y2) - D) / C;
 
             double distance1 = Math.Sqrt(Math.Pow(x1 - x0, 2) + Math.Pow(y1 - y0, 2) + Math.Pow(z1 - z0, 2));
             double distance2 = Math.Sqrt(Math.Pow(x2 - x0, 2) + Math.Pow(y2 - y0, 2) + Math.Pow(z2 - z0, 2));
@@ -520,6 +521,4 @@ public static class KUtils
             return false;
         }
     }
-
-
 }

@@ -32,5 +32,4 @@ public class RobotConfiguration
     /// Gets or sets 77 to 133 mm (gripper maximum Width)
     /// </summary>    
     public double EffectorGripMax { get; set; } = 13.3;
-
 }

@@ -35,7 +35,7 @@ public partial class RobotArmViewModel : ObservableObject
     /// </summary>
     private const int MinPointsBeforeConfirm = 5;
     public static Point DefaultRandomPoint = new Point(920, 395);
-    CancellationTokenSource _tokenSource;
+    CancellationTokenSource? _tokenSource;
 
     /// <summary>
     /// How many times the Inverse kinematics will try to adjust the robot position towards the mouse
@@ -94,7 +94,6 @@ public partial class RobotArmViewModel : ObservableObject
         IToastService toastService,
         IToolWindowService toolWindowService)
     {
-
         if (!heightRange.IsInZeroRange(mastHeightPosition))
         {
             throw new ArgumentOutOfRangeException(nameof(mastHeightPosition), $"{mastHeightPosition} is out of range");
@@ -121,8 +120,8 @@ public partial class RobotArmViewModel : ObservableObject
         _fileDialog = fileDialog;
         _toastService = toastService;
         FullyExtendedLenght = upperArmSegment.Length + forearmSegment.Length + effectorSegment.Length;
-        // MousePoint = new Point(_upperArmSegment.Length+_forearmSegment.Length+_effectorSegment.Length, 0);
 
+        // MousePoint = new Point(_upperArmSegment.Length+_forearmSegment.Length+_effectorSegment.Length, 0);
         MousePoint = DefaultRandomPoint;
         LastSurfacePoint = DefaultRandomPoint;
     }
@@ -137,7 +136,8 @@ public partial class RobotArmViewModel : ObservableObject
     /// <param name="forearmSegment">Outer link.</param>
     /// <param name="effectorSegment">Gripper.</param>
     /// <exception cref="ArgumentOutOfRangeException">range</exception>
-    public RobotArmViewModel(double mastHeightPosition,
+    public RobotArmViewModel(
+        double mastHeightPosition,
                              KRange heightRange,
                              Segment upperArmSegment,
                              Segment forearmSegment,
@@ -165,6 +165,7 @@ public partial class RobotArmViewModel : ObservableObject
         _messageBox = messageBoxService;
         _fileDialog = fileDialog;
         _toastService = toastService;
+
         //     MousePoint = new Point(_upperArmSegment.Length+_forearmSegment.Length+_effectorSegment.Length, 0);
         MousePoint = DefaultRandomPoint;
         LastSurfacePoint = DefaultRandomPoint;
@@ -177,7 +178,8 @@ public partial class RobotArmViewModel : ObservableObject
     /// <param name="upperArmSegment">Inner Link</param>
     /// <param name="forearmSegment">Outer link</param>
     /// <param name="effectorSegment">Gripper</param>
-    public RobotArmViewModel(Segment upperArmSegment, 
+    public RobotArmViewModel(
+        Segment upperArmSegment, 
                              Segment forearmSegment, 
                              Segment effectorSegment,
                              IMessageBoxService messageBoxService, 
@@ -196,6 +198,7 @@ public partial class RobotArmViewModel : ObservableObject
         MastPositionRange = new KRange(0, 400); // 40 cm  mast
         _toastService = toastService;
         MousePoint = new Point(_upperArmSegment.Length + _forearmSegment.Length + _effectorSegment.Length, 0);
+
         //MousePoint = DefaultRandomPoint;
         _toastService = toastService;
     }
@@ -247,6 +250,7 @@ public partial class RobotArmViewModel : ObservableObject
     /// The Upper Arm Segment (inner link)
     /// </summary>
     public Segment UpperArmSegment => _upperArmSegment;
+
     /// <summary>
     /// The Forearm Segment (outer link)
     /// </summary>
@@ -294,7 +298,6 @@ public partial class RobotArmViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     public partial bool IsMovingOnJointsDelta { get; set; } = false;
-
 
     /// <summary>
     /// Refresh when the shoulder is locked
@@ -364,6 +367,7 @@ public partial class RobotArmViewModel : ObservableObject
         _effectorLockCenter = EffectorSegment.PointB;
         MousePoint = _effectorLockCenter;
         _effectorSegment.IsPointBLocked = value;
+
         //Radius is the distance between the effector and the wrist (_effectorSegment.Length)
         Refresh?.Invoke(this, RefreshDrawingEventArgs.Empty);
     }
@@ -430,10 +434,10 @@ public partial class RobotArmViewModel : ObservableObject
     #region State Management
 
     [ObservableProperty]
-    public partial string LoadedRobotActionName { get; set;} = string.Empty;
+    public partial string LoadedRobotActionName { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial string LoadedRobotActionDescription { get; set;} = string.Empty;
+    public partial string LoadedRobotActionDescription { get; set; } = string.Empty;
 
     /// <summary>
     /// Recorded points array are being recorded
@@ -457,7 +461,7 @@ public partial class RobotArmViewModel : ObservableObject
     /// Y=position on the mast (zero based)
     /// </summary>
     [ObservableProperty]
-    public partial Point RobotArmOriginPosition { get; set;} = new Point(0, 0);
+    public partial Point RobotArmOriginPosition { get; set; } = new Point(0, 0);
 
     /// <summary>
     /// Range of the rail position in mm (min,max) 
@@ -475,10 +479,9 @@ public partial class RobotArmViewModel : ObservableObject
     private IMessageBoxService _messageBox;
     private IFileDialogService _fileDialog;
     private IToolWindowService _toolWindowService;
-    private MetaPoint _activePoint;
+    private MetaPoint? _activePoint;
 
     #endregion
-
 
     #region Commands
 
@@ -495,8 +498,8 @@ public partial class RobotArmViewModel : ObservableObject
         ForearmSegment.Update();
         EffectorSegment.Update();
         Refresh?.Invoke(this, RefreshDrawingEventArgs.Empty);
-        //_messageBox.Show("Robot Arm Homed...","Robot",MessageBoxServiceButton.Ok);   
 
+        //_messageBox.Show("Robot Arm Homed...","Robot",MessageBoxServiceButton.Ok);   
     }
 
     /// <summary>
@@ -522,9 +525,8 @@ public partial class RobotArmViewModel : ObservableObject
             Refresh?.Invoke(this, RefreshDrawingEventArgs.Empty);
         }
 
-        LoadedRobotActionName = "";
-        LoadedRobotActionDescription = "";
-
+        LoadedRobotActionName = string.Empty;
+        LoadedRobotActionDescription = string.Empty;
     }
 
     /// <summary>
@@ -543,7 +545,6 @@ public partial class RobotArmViewModel : ObservableObject
         {
             _messageBox.Show("Error saving file", "Error", MessageBoxServiceButton.Ok);
         }
-
     }
 
     /// <summary>
@@ -558,8 +559,8 @@ public partial class RobotArmViewModel : ObservableObject
         _fileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
         RecordedMetaPoints = _fileDialog.LoadMetaPointsFromFile();
-        LoadedRobotActionName = RecordedMetaPoints.Name;
-        LoadedRobotActionDescription = RecordedMetaPoints.Description;
+        LoadedRobotActionName = RecordedMetaPoints.Name ?? string.Empty;
+        LoadedRobotActionDescription = RecordedMetaPoints.Description ?? string.Empty;
     }
 
     /// <summary>
@@ -573,6 +574,7 @@ public partial class RobotArmViewModel : ObservableObject
         // Find way to differentiate when the teach pendant called it and when the user clicked it so we can refresh the teach pendant view
         MousePoint = EffectorSegment.PointB;
         var angleLock = (JointsLocks)(IsShoulderLocked ? 1 : 0) + (IsElbowLocked ? 2 : 0) + (IsWristLocked ? 4 : 0);
+
         //_recordedMetaPoints.Add(new MetaPoint( new Point(_mousePoint.X, _mousePoint.Y),1,angleLock));
         IsPointManuallyAdded = true;
         Refresh?.Invoke(this, RefreshDrawingEventArgs.Empty);
@@ -586,6 +588,7 @@ public partial class RobotArmViewModel : ObservableObject
             ArmHeightPosition,
             ArmRailPosition,
             EffectorSegment.PointB));
+
         //MousePoint = EffectorSegment.PointB;
         //_messageBox.Show("Adding point to record","Recording",MessageBoxServiceButton.Ok);   
         _toastService.ShowToast("Point Added to Record", ToastLocation.ApplicationTopCenter, BadgeTypeEnum.Success, 3);
@@ -604,8 +607,7 @@ public partial class RobotArmViewModel : ObservableObject
     [RelayCommand]
     private async Task Play()
     {
-        ///if no joint is locked, we will try to follow the straight line between 2 recorded points
-        
+        // If no joint is locked, try to follow the straight line between two recorded points.
         if (IsPlaying)
         {
             return;
@@ -614,6 +616,7 @@ public partial class RobotArmViewModel : ObservableObject
         IsPlaying = true;
         _playbackIndex = 0;
         List<MetaPoint> playbackPoints = new List<MetaPoint>();
+
         // for each successive pair of points in the list, calculate the distance between them and the number of steps required to get there
         // then create a list of points in between the two points
         // then add the list of points to the playback list
@@ -629,7 +632,6 @@ public partial class RobotArmViewModel : ObservableObject
             // let's move the end effector as close as possible between the two points
             // then calculate the angles to get there
             // THE MAIN CHALLENGE HERE IS WHEN THE EFFECTOR HAS TO MOVE IN A CIRCLE around a point
-
             if (RecordedMetaPoints.Points[i].JointsLocks.HasFlag(JointsLocks.None))
             {
                 // no joint is locked, we will try to follow the straight line between 2 recorded points by calculating
@@ -646,6 +648,7 @@ public partial class RobotArmViewModel : ObservableObject
                 var elbowSteps = (int)(elbowAngleDistance * 2);
                 var wristSteps = (int)(wristAngleDistance * 2);
                 int maxSteps = (int)KUtils.GetDistanceBetweenTwoPoints(RecordedMetaPoints.Points[i].MousePoint, RecordedMetaPoints.Points[i + 1].MousePoint);
+
                 //var maxSteps = Math.Max(Math.Max(Math.Abs(shoulderSteps), Math.Abs(elbowSteps)), Math.Abs(wristSteps));
                 var shoulderPoints = KUtils.GetAnglesInBetweenTwoAngles(RecordedMetaPoints.Points[i].ShoulderAngle, RecordedMetaPoints.Points[i + 1].ShoulderAngle, maxSteps);
                 var elbowPoints = KUtils.GetAnglesInBetweenTwoAngles(RecordedMetaPoints.Points[i].ElbowAngle, RecordedMetaPoints.Points[i + 1].ElbowAngle, maxSteps);
@@ -653,6 +656,7 @@ public partial class RobotArmViewModel : ObservableObject
                 for (int j = 0; j < maxSteps; j++)
                 {
                     playbackPoints.Add(new MetaPoint(RecordedMetaPoints.Points[i].MousePoint, j == 0 ? 1 : 2, RecordedMetaPoints.Points[i].JointsLocks, shoulderPoints[j], elbowPoints[j], wristPoints[j], 0, 0, RecordedMetaPoints.Points[i].EffectorGripPoint));
+
                     //Debug.WriteLine($"Shoulder: {shoulderPoints[j]} elbow: {elbowPoints[j]} wrist: {wristPoints[j]}");
                 }
 
@@ -661,7 +665,6 @@ public partial class RobotArmViewModel : ObservableObject
             else// isFollowingEffectorLine == true or IsMovingOnJointsDelta == false
             {
                 // Set points based on the recorded points kinematics calculations
-
                 double distance = KUtils.GetDistanceBetweenTwoPoints(RecordedMetaPoints.Points[i].MousePoint, RecordedMetaPoints.Points[i + 1].MousePoint);
                 var pts = KUtils.GetPointsInBetweenTwoPoints(RecordedMetaPoints.Points[i].MousePoint, RecordedMetaPoints.Points[i + 1].MousePoint, (int)distance);
                 for (int j = 0; j < pts.Count; j++)
@@ -696,6 +699,7 @@ public partial class RobotArmViewModel : ObservableObject
                     IsElbowLocked = playbackPoints[_playbackIndex].JointsLocks.HasFlag(JointsLocks.Elbow);
                     IsShoulderLocked = playbackPoints[_playbackIndex].JointsLocks.HasFlag(JointsLocks.Shoulder);
                     IsEffectorLocked = playbackPoints[_playbackIndex].JointsLocks.HasFlag(JointsLocks.EffectorGrip);
+
                     // When playing draw the active point
                     _activePoint = playbackPoints[_playbackIndex];
                     Debug.WriteLine($"[{playbackPoints[_playbackIndex].Speed}] -- Shoulder: {playbackPoints[_playbackIndex].ShoulderAngle} elbow: {playbackPoints[_playbackIndex].ElbowAngle} wrist: {playbackPoints[_playbackIndex].WristAngle}");
@@ -742,7 +746,10 @@ public partial class RobotArmViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanExecuteShoulderRotate))]
     private void ShoulderRotate(string? angleDirection)
     {
-        if (IsShoulderLocked) return;
+        if (IsShoulderLocked)
+        {
+            return;
+        }
 
         double direction = 1;
         if (double.TryParse(angleDirection, out direction))
@@ -751,7 +758,6 @@ public partial class RobotArmViewModel : ObservableObject
         }
 
         RotateBy(_angleIncrement * direction, _angleIncrement * direction, _angleIncrement * direction);
-
     }
 
     /// <summary>
@@ -782,7 +788,6 @@ public partial class RobotArmViewModel : ObservableObject
             _messageBox.Show("Gripping...", "Grip", MessageBoxServiceButton.Ok);
             IsEffectorGripped = true;
         }
-
     }
 
     /// <summary>
@@ -883,7 +888,7 @@ public partial class RobotArmViewModel : ObservableObject
         }
 
         double offset = (double) param;
-        var pos = RailPositionRange.GetClosestValueInRange(ArmRailPosition - offset);
+        var pos = RailPositionRange.GetClosestValueInRange(ArmRailPosition + offset);
         if(pos == ArmRailPosition)
         {
             return;
@@ -907,7 +912,7 @@ public partial class RobotArmViewModel : ObservableObject
         }
 
         double offset = (double) param; 
-        var pos = RailPositionRange.GetClosestValueInRange(ArmRailPosition + offset);
+        var pos = RailPositionRange.GetClosestValueInRange(ArmRailPosition - offset);
         if(pos == ArmRailPosition)
         {
             return;
@@ -942,7 +947,11 @@ public partial class RobotArmViewModel : ObservableObject
     /// <param name="wristAngle">Wrist rotation increment in radians</param>
     private void RotateBy(double shoulderAngle, double elbowAngle, double wristAngle)
     {
-        if (_effectorSegment == null || _forearmSegment == null || _upperArmSegment == null) return;
+        if (_effectorSegment == null || _forearmSegment == null || _upperArmSegment == null)
+        {
+            return;
+        }
+
         //if(_isElbowLocked){ elbowAngle=0;}
         //if(_isShoulderLocked){ shoulderAngle=0;}
         //if(_isWristLocked){ wristAngle=0;}
@@ -981,7 +990,7 @@ public partial class RobotArmViewModel : ObservableObject
         double L3 = _effectorSegment.Length;
 
         // calculate distance between shoulderOriginPoint and effectorGripPoint using Pythagorean theorem
-        double distance = Math.Sqrt(Math.Pow((effectorGripPoint.X - shoulderOriginPoint.X), 2) + Math.Pow((effectorGripPoint.Y - shoulderOriginPoint.Y), 2));
+        double distance = Math.Sqrt(Math.Pow(effectorGripPoint.X - shoulderOriginPoint.X, 2) + Math.Pow(effectorGripPoint.Y - shoulderOriginPoint.Y, 2));
 
         // calculate limits based on the lengths of the segments
         double lowerLimit = Math.Max(Math.Abs(L1 - L2), Math.Abs(L2 - L3));
@@ -1037,7 +1046,6 @@ public partial class RobotArmViewModel : ObservableObject
             {
                 if (IsWristLocked)
                 {
-
                     var curAngle = ForearmSegment.Angle;
                     ForearmSegment.Follow(new Point(MousePoint.X, MousePoint.Y)); // Shift by the effector
                     ForearmSegment.Update();
@@ -1131,7 +1139,6 @@ public partial class RobotArmViewModel : ObservableObject
         // ---- Inverse kinematics Loop ----
         for (int i = 0; i < AdjustIterations; i++) //  iterations to make it closer to the goal
         {
-
             // Gripper follows the mouse
             effectorSegment.Follow(new Point(pointToFollow.X, pointToFollow.Y));
             effectorSegment.Update();
@@ -1152,7 +1159,6 @@ public partial class RobotArmViewModel : ObservableObject
             forearmSegment.RelativeAngle = KUtils.RadianToDegree(forearmSegment.Angle - upperArmSegment.Angle);
 
             effectorSegment.RelativeAngle = KUtils.RadianToDegree(effectorSegment.Angle - forearmSegment.Angle);
-
 
             // Break the inverse kinematic loop if we are within the distance tolerance
             if (KUtils.GetDistanceBetweenTwoPoints(pointToFollow, effectorSegment.PointB) < deltaTolerance)

@@ -5,7 +5,6 @@ using KinematicsDemo.ViewModels;
 
 namespace KinematicsDemo.UserControls;
 
-
 /// <summary>
 /// Interaction logic for HeightIndicator.xaml
 /// </summary>

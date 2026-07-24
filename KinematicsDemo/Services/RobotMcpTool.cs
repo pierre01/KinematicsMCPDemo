@@ -12,8 +12,9 @@ namespace KinematicsDemo.Services;
 [McpServerToolType]
 public static class RobotMcpTool
 {
-    public static RobotArmViewModel Robot;
-    public static List<RobotCoordinate> Coordinates = new List<RobotCoordinate>();
+    public static RobotArmViewModel? Robot { get; set; }
+
+    public static List<RobotCoordinate> Coordinates { get; } = new();
 
     /// <summary>
     /// Retrieves the current position of the robot's end effector.
@@ -36,19 +37,18 @@ public static class RobotMcpTool
     /// <param name="armUpOrDownBy">The amount, in millimeters, to move the robot arm along the Z axis. Can be positive or negative to indicate direction.</param>
     /// <returns>A RobotCoordinate representing the new position of the robot arm after the movement.</returns>
     [McpServerTool]
-    [Description("Moves the robot arm by a specified distance (in millimeters) along each axis. Positive and negative values indicate direction.The robot moves relative to its current position. (values are not cummulative acreoss call)")]
+    [Description("Moves the robot by relative distances in millimeters. Positive values mean rail forward, arm extend, left, and up. Negative values mean rail backward, arm retract, right, and down. Each value is a delta from the current position; the returned coordinates are absolute.")]
     public static async Task<RobotCoordinate> MoveBy(
-            [Description("Distance to move along the rail axis (usually the base linear track). Positive values move the robot forward on the rail (away from the home position). Negative values move it backward on the rail (toward the home position). instructions should include the word rail (e.g. rail forward, rail backward)")]
+            [Description("Relative rail distance in millimeters. Positive moves forward and increases the rail coordinate; negative moves backward and decreases it.")]
             double railChangeBy = 0,
-            [Description("Distance to move along the X-axis in the robot's local coordinate system. Positive values move the arm to extend. Negative values retract the arm (towards the mast)).")]
+            [Description("Relative X distance in millimeters. Positive extends the arm and increases X; negative retracts the arm and decreases X.")]
             double armExtendOrRetractBy = 0,
-            [Description("Distance to move along the Y-axis in the robot's local coordinate system. Positive values move the arm to the Left. Negative values move it to the right.")]
+            [Description("Relative Y distance in millimeters. Positive moves left and increases Y; negative moves right and decreases Y.")]
             double armLeftOrRightBy = 0,
-            [Description("Distance to move along the Z-axis (vertical mast). Positive values move the arm up / upward. Negative values move it down / downward.")]
+            [Description("Relative Z distance in millimeters. Positive moves up and increases Z; negative moves down and decreases Z.")]
             double armUpOrDownBy = 0)
     {
-
-        if (Robot == null)
+        if (Robot is not { } robot)
         {
             return new RobotCoordinate(0, 0, 0, 0);
         }
@@ -61,41 +61,26 @@ public static class RobotMcpTool
             {
                 if (railChangeBy > 0)
                 {
-                    Robot?.GoForwardCommand.Execute(railChangeBy);
+                    robot.GoForwardCommand.Execute(railChangeBy);
                 }
                 else if (railChangeBy < 0)
                 {
-                    Robot?.GoBackwardCommand.Execute(-railChangeBy);
+                    robot.GoBackwardCommand.Execute(-railChangeBy);
                 }
 
                 if (armUpOrDownBy > 0)
                 {
-                    Robot?.GoUpCommand.Execute(armUpOrDownBy);
+                    robot.GoUpCommand.Execute(armUpOrDownBy);
                 }
                 else if (armUpOrDownBy < 0)
                 {
-                    Robot?.GoDownCommand.Execute(-armUpOrDownBy);
+                    robot.GoDownCommand.Execute(-armUpOrDownBy);
                 }
 
                 // TODO: Needs to be optimized
-                var m = Robot.LastSurfacePoint;
-                if (armExtendOrRetractBy > 0)
-                {
-                    m.X += armExtendOrRetractBy;
-                }
-                else if (armExtendOrRetractBy < 0)
-                {
-                    m.X += armExtendOrRetractBy;
-                }
-
-                if (armLeftOrRightBy > 0)
-                {
-                    m.Y += armLeftOrRightBy;
-                }
-                else if (armLeftOrRightBy < 0)
-                {
-                    m.Y += armLeftOrRightBy;
-                }
+                var m = robot.LastSurfacePoint;
+                m.X += armExtendOrRetractBy;
+                m.Y += armLeftOrRightBy;
 
                 UpdateAndRefresh(m);
                 newCoordinates = GetCoordinates();
@@ -116,15 +101,15 @@ public static class RobotMcpTool
     /// <param name="zPosition">New z position</param>
     /// <returns>new robot coordinates</returns>
     [McpServerTool]
-    [Description("Move the robot arm to a point in space and returns the new position (Furthest possible Reach sor the robot) coordinates are in Millimeters")]
+    [Description("Moves the robot to absolute coordinates in millimeters and returns the reached absolute position. Increasing rail is forward, increasing X is extend, increasing Y is left, and increasing Z is up.")]
     public static async Task<RobotCoordinate> MoveTo(
-        [Description("Position on the rail in millimeters")] double railPosition,
-        [Description("X Position of the arm effector extended or retracted in millimeters")] double xPosition,
-        [Description("Y Position of the arm effector (Left and right)  in millimeters")] double yPosition,
-        [Description("Height Position of the arm on the mast in millimeters")] double zPosition)
+        [Description("Absolute rail coordinate in millimeters; larger values are farther forward and smaller values are farther backward.")] double railPosition,
+        [Description("Absolute X coordinate in millimeters; larger values are more extended and smaller values are more retracted.")] double xPosition,
+        [Description("Absolute Y coordinate in millimeters; larger values are farther left and smaller values are farther right.")] double yPosition,
+        [Description("Absolute Z coordinate in millimeters; larger values are higher and smaller values are lower.")] double zPosition)
     {
         // Get the current Z position and move down if needed based on the zPosition
-        if (Robot == null)
+        if (Robot is not { } robot)
         {
             return new RobotCoordinate(0, 0, 0, 0);
         }
@@ -135,61 +120,31 @@ public static class RobotMcpTool
         await Application.Current.Dispatcher.InvokeAsync(
             () =>
             {
-                var currentRail = Robot.ArmRailPosition;
-                var stepPrecision = currentRail - railPosition; // in millimeters
+                var currentRail = robot.ArmRailPosition;
+                var stepPrecision = railPosition - currentRail;
                 if (stepPrecision > 0)
                 {
-                    Robot?.GoForwardCommand.Execute(stepPrecision);
-                    currentRail += stepPrecision;
+                    robot.GoForwardCommand.Execute(stepPrecision);
                 }
                 else if (stepPrecision < 0)
                 {
-                    Robot?.GoBackwardCommand.Execute(-stepPrecision);
-                    currentRail += stepPrecision;
+                    robot.GoBackwardCommand.Execute(-stepPrecision);
                 }
 
-                var currentZ = Robot.ArmHeightPosition;
-                stepPrecision = currentZ - zPosition; // in millimeters
+                var currentZ = robot.ArmHeightPosition;
+                stepPrecision = zPosition - currentZ;
                 if (stepPrecision > 0)
                 {
-                    Robot?.GoUpCommand.Execute(stepPrecision);
-                    currentZ += stepPrecision;
+                    robot.GoUpCommand.Execute(stepPrecision);
                 }
                 else if (stepPrecision < 0)
                 {
-                    Robot?.GoDownCommand.Execute(-stepPrecision);
-                    currentZ -= stepPrecision;
+                    robot.GoDownCommand.Execute(-stepPrecision);
                 }
 
-                // TODO: Needs to be optimized
-                var currentPoint = Robot.MousePoint;
-                var xStepPrecision = currentPoint.X - xPosition;
-                if (xStepPrecision > 0)
-                {
-                    var m = Robot.LastSurfacePoint;
-                    m.X -= xStepPrecision;
-                    currentPoint.X = m.X;
-                }
-                else if (xStepPrecision < 0)
-                {
-                    var m = Robot.LastSurfacePoint;
-                    m.X += xStepPrecision;
-                    currentPoint.X = m.X;
-                }
-
-                var yStepPrecision = currentPoint.Y - yPosition;
-                if (yStepPrecision > 0)
-                {
-                    var m = Robot.LastSurfacePoint;
-                    m.Y -= yStepPrecision;
-                    currentPoint.Y = m.Y;
-                }
-                else if (yStepPrecision < 0)
-                {
-                    var m = Robot.LastSurfacePoint;
-                    m.Y += yStepPrecision;
-                    currentPoint.Y = m.Y;
-                }
+                var currentPoint = robot.MousePoint;
+                currentPoint.X = xPosition;
+                currentPoint.Y = yPosition;
 
                 UpdateAndRefresh(currentPoint);
                 newCoordinates = GetCoordinates();
@@ -206,7 +161,7 @@ public static class RobotMcpTool
         await Application.Current.Dispatcher.InvokeAsync(
         () =>
         {
-            Robot.AddPointCommand.Execute(null);
+            Robot?.AddPointCommand.Execute(null);
             Coordinates.Add(GetCoordinates());
         },
         DispatcherPriority.Send);
@@ -259,11 +214,9 @@ public static class RobotMcpTool
         await Application.Current.Dispatcher.InvokeAsync(
             () =>
             {
-
                 Robot?.GoHomeCommand.Execute(null);
         
                 newCoordinates = GetCoordinates();
-
             },
             DispatcherPriority.Send);
 
@@ -296,7 +249,7 @@ public static class RobotMcpTool
     /// === ONLY CALL FROM UI THREAD ===
     /// </summary>
     /// <param name="m">The point to set as the robot's current mouse and surface position.</param>
-    private static async Task UpdateAndRefresh(Point m)
+    private static void UpdateAndRefresh(Point m)
     {
         if( Robot == null)
         {
@@ -313,14 +266,17 @@ public static class RobotMcpTool
         }
         else
         {
-           await Application.Current.Dispatcher.InvokeAsync(
-           () =>
+            Application.Current.Dispatcher.Invoke(
+            () =>
             {
-                Robot.MousePoint = m;
-                Robot.LastSurfacePoint = m;
-                Robot.RefreshDrawing();
+                if (Robot is { } robot)
+                {
+                    robot.MousePoint = m;
+                    robot.LastSurfacePoint = m;
+                    robot.RefreshDrawing();
+                }
             },
-           DispatcherPriority.Send);
+            DispatcherPriority.Send);
         }
     }
 }

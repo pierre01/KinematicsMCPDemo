@@ -73,7 +73,6 @@ namespace KinematicsDemo.Styles
             StrokeWidth = 2,
         };
 
-
         public static SKPaint MousePaint = new SKPaint
         {
             Style = SKPaintStyle.Stroke,

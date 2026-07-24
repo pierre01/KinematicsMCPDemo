@@ -10,6 +10,10 @@ namespace RobotMcpClient.Services;
 
 public class SemanticKernelService : ISemanticKernelService
 {
+    private const int MaxResponseTokens = 512;
+    private const int HistoryTargetCount = 12;
+    private const int HistoryThresholdCount = 20;
+
     // ===== OpenAI chat model config =====
     private const string chatModel = "gpt-5-mini";// gpt-5-nano
 
@@ -23,7 +27,7 @@ public class SemanticKernelService : ISemanticKernelService
     private IChatCompletionService? _chatCompletionService;
     private OpenAIPromptExecutionSettings? _openAIPromptExecutionSettings;
 
-    private IChatHistoryReducer _reducer;
+    private IChatHistoryReducer? _reducer;
 
     private int _lastTotalTokens = 0;
     private int _totalTokens = 0;
@@ -35,14 +39,25 @@ public class SemanticKernelService : ISemanticKernelService
     {
         try
         {        
-            _history = [];
+            _history =
+            [
+                new ChatMessageContent(
+                    AuthorRole.System,
+                    "Control the robot by calling the matching tool immediately. " +
+                    "Use millimeters, treat movement commands as relative deltas, and trust the tool result as the new absolute position. " +
+                    "Execute exactly one tool call for each user-requested action. After a tool succeeds, do not call it again in the same turn. " +
+                    "When the user says 'again', repeat the most recent requested action exactly once with the same arguments. " +
+                    "Do not reconstruct or debate prior coordinates. Keep the final response to one short sentence.")
+            ];
             //Wait 10 seconds before initializing the kernel to allow time for the MCP server to start
             await Task.Delay(10000);
 
             // If you keep cloud as an option, set useLocal = true/false to toggle
-            var useLocal = false;
+            var useLocal = true;
 
-            _reducer = new ChatHistoryTruncationReducer(targetCount: 40, thresholdCount: 60);
+            _reducer = new ChatHistoryTruncationReducer(
+                targetCount: HistoryTargetCount,
+                thresholdCount: HistoryThresholdCount);
 
 
             _builder = Kernel.CreateBuilder();
@@ -101,18 +116,15 @@ public class SemanticKernelService : ISemanticKernelService
             // Optimized for robot control with tool use
             _openAIPromptExecutionSettings = new()
             {
-                //Temperature = 1,
-                //TopP = 0.4,
-                //FrequencyPenalty = 0,
-                //PresencePenalty = 0, 
-                ////ReasoningEffort = "minimal",
+                ReasoningEffort = "minimal",
 
                 // This is the key line – lets the model pick functions
                 ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
 
-                // Low MaxTokens does not reduce tool-call reliability.
-                // MaxTokens reduces natural-language verbosity — nothing else.
-                MaxTokens = 8000
+                // Tool selection and a short confirmation should fit comfortably
+                // while preventing a local reasoning model from consuming the
+                // entire context budget on a simple robot command.
+                MaxTokens = MaxResponseTokens
             };
 
             _kernel = _builder.Build();
@@ -142,6 +154,11 @@ public class SemanticKernelService : ISemanticKernelService
 
     public async Task HomeRobot()
     {
+        if (_kernel is null)
+        {
+            return;
+        }
+
         foreach (var plugin in _kernel.Plugins)
         {
             Debug.WriteLine($"Plugin: {plugin.Name}");
@@ -191,9 +208,14 @@ public class SemanticKernelService : ISemanticKernelService
 
             _history.AddUserMessage(prompt);
 
-            // If you want trimming, uncomment to apply reducer:
-            // var reduced = await _reducer.ReduceAsync(_history);
-            // if (reduced is not null) _history = new ChatHistory(reduced);
+            if (_reducer is not null)
+            {
+                var reduced = await _reducer.ReduceAsync(_history, cancellationToken);
+                if (reduced is not null)
+                {
+                    _history = new ChatHistory(reduced);
+                }
+            }
 
             if (_chatCompletionService is null)
             {
@@ -207,7 +229,13 @@ public class SemanticKernelService : ISemanticKernelService
             ChatMessageContent result = await _chatCompletionService.GetChatMessageContentAsync(
                 _history,
                 executionSettings: _openAIPromptExecutionSettings,
-                kernel: _kernel);
+                kernel: _kernel,
+                cancellationToken: cancellationToken);
+
+            // Auto function invocation adds its intermediate tool-call/result
+            // messages, but the returned final assistant message must be kept
+            // explicitly so follow-ups such as "again" see a completed turn.
+            _history.Add(result);
 
             stopwatch.Stop();
 

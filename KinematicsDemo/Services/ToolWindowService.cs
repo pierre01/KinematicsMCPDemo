@@ -1,6 +1,6 @@
-﻿using KinematicsDemo.ViewModels;
+﻿using System.Windows;
+using KinematicsDemo.ViewModels;
 using KinematicsDemo.Views;
-using System.Windows;
 
 namespace KinematicsDemo.Services;
 

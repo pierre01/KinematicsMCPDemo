@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Windows;
+
 namespace KinematicsDemo.Services.MessageBoxService;
 
 public partial class MessageBoxDialog : Window
 {
-
     private MessageBoxServiceResult _result = MessageBoxServiceResult.None;
+
     public MessageBoxServiceResult Result { get => _result; }
 
     public MessageBoxDialog(string message, string header = "", MessageBoxServiceButton buttons = MessageBoxServiceButton.Ok, MessageBoxServiceIcon icon = MessageBoxServiceIcon.None, MessageBoxServiceResult defaultButton = MessageBoxServiceResult.OK)
@@ -32,6 +33,7 @@ public partial class MessageBoxDialog : Window
             default:
                 break;
         }
+
         switch (buttons)
         {
             case MessageBoxServiceButton.OkCancel:
@@ -59,6 +61,7 @@ public partial class MessageBoxDialog : Window
                 OkButton.Visibility = Visibility.Visible;
                 break;
         }
+
         switch (defaultButton)
         {
             case MessageBoxServiceResult.Cancel:
@@ -74,6 +77,7 @@ public partial class MessageBoxDialog : Window
                 OkButton.IsDefault = true;
                 break;
         }
+
         if (Application.Current.MainWindow != null)
         {
             Owner = Application.Current.MainWindow;
@@ -104,6 +108,7 @@ public partial class MessageBoxDialog : Window
         _result = MessageBoxServiceResult.No;
         DialogResult = true;
     }
+
     /// <summary>
     /// MessageBox is closed - Handle cases when the close button is clicked and doesn't register as cancel
     /// </summary>
@@ -130,14 +135,13 @@ public partial class MessageBoxDialog : Window
                     {
                         _result = MessageBoxServiceResult.Yes;
                     }
+
                     if (NoButton.IsCancel)
                     {
                         _result = MessageBoxServiceResult.No;
                     }
                 }
             }
-
-
         }
     }
 }

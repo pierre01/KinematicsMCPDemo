@@ -255,3 +255,25 @@ dotnet_diagnostic.SA1626.severity = suggestion
 
 # SA1625: Element documentation should not be copied and pasted
 dotnet_diagnostic.SA1625.severity = suggestion
+
+# Keep legacy structural and documentation conventions available as IDE
+# suggestions without treating non-functional style preferences as build warnings.
+dotnet_diagnostic.SA0001.severity = none
+dotnet_diagnostic.SA1111.severity = suggestion
+dotnet_diagnostic.SA1115.severity = suggestion
+dotnet_diagnostic.SA1123.severity = suggestion
+dotnet_diagnostic.SA1124.severity = suggestion
+dotnet_diagnostic.SA1137.severity = suggestion
+dotnet_diagnostic.SA1201.severity = suggestion
+dotnet_diagnostic.SA1202.severity = suggestion
+dotnet_diagnostic.SA1203.severity = suggestion
+dotnet_diagnostic.SA1204.severity = suggestion
+dotnet_diagnostic.SA1312.severity = suggestion
+dotnet_diagnostic.SA1313.severity = suggestion
+dotnet_diagnostic.SA1316.severity = suggestion
+dotnet_diagnostic.SA1400.severity = suggestion
+dotnet_diagnostic.SA1401.severity = suggestion
+dotnet_diagnostic.SA1413.severity = suggestion
+dotnet_diagnostic.SA1633.severity = suggestion
+dotnet_diagnostic.SA1636.severity = suggestion
+dotnet_diagnostic.SA1649.severity = suggestion

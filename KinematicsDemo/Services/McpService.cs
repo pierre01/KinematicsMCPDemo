@@ -148,6 +148,7 @@ public class McpService : IMCPServer, IAsyncDisposable
         try
         {
             _cts?.Cancel(); // signal your own lifetime intent
+
             // StopAsync token bounds how long to wait for graceful shutdown.
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             linked.CancelAfter(TimeSpan.FromSeconds(10));

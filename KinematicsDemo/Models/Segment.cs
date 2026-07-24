@@ -12,7 +12,6 @@ namespace KinematicsDemo.Models;
 /// </summary>
 public partial class Segment : ObservableObject
 {
-
     private Point _pointA;
 
     /// <summary>
@@ -55,6 +54,7 @@ public partial class Segment : ObservableObject
                 double sign = isClockwise ? -1 : 1;
                 RelativeAngle += sign * angleIncrement;
             }
+
             _pointA = value;
             CalculateB();
         }
@@ -100,10 +100,9 @@ public partial class Segment : ObservableObject
         MinAngle = minAngle;
         _pointA = new Point(x, y);
         Length = length;
-        Angle = initialAngle;// KUtils.DegreeToRadian(KUtils.GetClosestAngleBetweenTwoAngles( initialAngle,MinAngle,MaxAngle));
+        Angle = initialAngle; // KUtils.DegreeToRadian(KUtils.GetClosestAngleBetweenTwoAngles( initialAngle,MinAngle,MaxAngle));
         RelativeAngle = KUtils.RadianToDegree(Angle);
         CalculateB();
-
     }
 
     /// <summary>
@@ -137,12 +136,9 @@ public partial class Segment : ObservableObject
         double angle = KUtils.CalculateAngle(distAtoC, distAtoB, distBtoC);
 
         Length = distAtoB;
-        Angle = angle;// KUtils.DegreeToRadian(KUtils.GetClosestAngleBetweenTwoAngles( initialAngle,MinAngle,MaxAngle));
+        Angle = angle; // KUtils.DegreeToRadian(KUtils.GetClosestAngleBetweenTwoAngles( initialAngle,MinAngle,MaxAngle));
         RelativeAngle = KUtils.RadianToDegree(Angle);
-
     }
-
-
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Segment"/> class.
@@ -165,7 +161,6 @@ public partial class Segment : ObservableObject
         Length = length;
         Angle = KUtils.DegreeToRadian(initialAngle); // KUtils.DegreeToRadian(KUtils.GetClosestAngleBetweenTwoAngles( initialAngle,MinAngle,MaxAngle));
         CalculateB();
-
     }
 
     /// <summary>
@@ -187,6 +182,7 @@ public partial class Segment : ObservableObject
         Vector directionVector = new Vector(target.X - _pointA.X, target.Y - _pointA.Y);
         var angle = Math.Atan2(directionVector.Y, directionVector.X);
         Angle = KUtils.GetClosestAngleBetweenTwoAngles(angle, MinAngle, MaxAngle);
+
         // are different, we are locked to one of the max  
         directionVector.Normalize();
         directionVector *= Length;
@@ -200,10 +196,10 @@ public partial class Segment : ObservableObject
     /// <param name="target"></param>
     public void FollowWithB(Point target)
     {
-
         Vector directionVector = new Vector(target.X - _pointB.X, target.Y - _pointB.Y);
         var angle = Math.Atan2(directionVector.Y, directionVector.X);
         Angle = KUtils.GetClosestAngleBetweenTwoAngles(angle, MinAngle, MaxAngle);
+
         // are different, we are locked to one of the max  
         directionVector.Normalize();
         directionVector *= Length;
@@ -220,6 +216,7 @@ public partial class Segment : ObservableObject
         {
             return;
         }
+
         double dx = Length * Math.Cos(Angle);
         double dy = Length * Math.Sin(Angle);
         _pointB = new Point(_pointA.X + dx, _pointA.Y + dy);
@@ -238,7 +235,11 @@ public partial class Segment : ObservableObject
     /// <param name="jointPaint"></param>
     public virtual void Draw(SKCanvas? canvas, SKPaint segmentPaint, SKPaint jointPaint, bool isJointLocked = false, bool isExtremityLocked = false)
     {
-        if (canvas == null) return;
+        if (canvas == null)
+        {
+            return;
+        }
+
         canvas.DrawLine((float)_pointA.X, (float)_pointA.Y, (float)_pointB.X, (float)_pointB.Y, segmentPaint);
 
         // If the joint is locked, draw a red circle to indicate it is locked

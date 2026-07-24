@@ -23,7 +23,6 @@ public class MetaPoint
 
     public MetaPoint()
     {
-
     }
 
     // TODO: add angles, Z, and Rail positions
@@ -65,7 +64,6 @@ public class MetaPoint
         _zPosition = zPosition;
         _railPosition = railPosition;
         _effectorGripPoint = effectorGripPoint;
-
     }
 
     public double ShoulderAngle
@@ -88,7 +86,6 @@ public class MetaPoint
 
     public double ZPosition
     {
-
         get => _zPosition;
         set => _zPosition = value;
     }
@@ -104,7 +101,6 @@ public class MetaPoint
         get => _effectorGripPoint;
         set => _effectorGripPoint = value;
     }
-
 
     public Point MousePoint
     {

@@ -21,7 +21,7 @@ public  interface ISemanticKernelService
 public class KernelPluginResult
 {
     public bool IsSuccess { get; set; } = true;
-    public string Result { get; set; }
+    public string Result { get; set; } = string.Empty;
     public int InputTokens { get; set; }
     public int OutputTokens { get; set; }
     public int TotalTokens { get; set; }

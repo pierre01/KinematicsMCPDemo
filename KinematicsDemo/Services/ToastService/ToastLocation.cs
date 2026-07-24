@@ -25,5 +25,4 @@ public enum ToastLocation
     /// Supported for toast
     /// </summary>
     ApplicationBottomRight
-
 }

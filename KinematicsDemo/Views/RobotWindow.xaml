@@ -17,6 +17,7 @@
     mc:Ignorable="d">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="boolConv" />
+        <local:InvertDoubleConverter x:Key="invertDoubleConverter" />
     </Window.Resources>
     <Window.InputBindings>
         <KeyBinding
@@ -29,7 +30,9 @@
             <Grid x:Name="WorkCellGrid" RenderTransformOrigin="0.5,0.5" HorizontalAlignment="Center" Height="739"  Canvas.Top="-51" VerticalAlignment="Top">
                 <Grid.RenderTransform>
                     <TransformGroup>
-                        <TranslateTransform X="{Binding ArmRailPosition}"/>
+                        <!-- The robot's physical rail coordinate stays positive-forward.
+                             Only the background viewport moves in the opposite direction. -->
+                        <TranslateTransform X="{Binding ArmRailPosition, Converter={StaticResource invertDoubleConverter}}"/>
                     </TransformGroup>
                 </Grid.RenderTransform>
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -31,7 +32,6 @@ namespace KinematicsDemo.ViewModels
             _y = _robotViewModel.MousePoint.Y;            
             _z = _robotViewModel.ArmHeightPosition;
             _railPosition = _robotViewModel.ArmRailPosition;
-
         }
 
         [ObservableProperty]
@@ -86,8 +86,6 @@ namespace KinematicsDemo.ViewModels
             }
         }
 
-
-
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(StepPrecisionString))]
         private double _stepPrecision = 5.0; // 5mm
@@ -104,7 +102,7 @@ namespace KinematicsDemo.ViewModels
         }
 
         [RelayCommand]
-        private async void SwitchRemoteMode(object param)
+        private async Task SwitchRemoteMode(object param)
         {
             bool isRemote = (bool)param;
             if (isRemote)
@@ -121,7 +119,6 @@ namespace KinematicsDemo.ViewModels
 
         [ObservableProperty]
         public partial string RemoteModeTooltip { get; set; } = "Stop Mobile Server";
-
 
         /// <summary>
         /// Record the current point
@@ -213,7 +210,6 @@ namespace KinematicsDemo.ViewModels
         [RelayCommand]
         public void GoUp()
         {
-
                 _robotViewModel.GoUpCommand.Execute(StepPrecision);
                 Z = _robotViewModel.ArmHeightPosition;
         }
@@ -223,10 +219,8 @@ namespace KinematicsDemo.ViewModels
         [RelayCommand]
         public void GoDown()
         {
-
                 _robotViewModel.GoDownCommand.Execute(StepPrecision);
                 Z = _robotViewModel.ArmHeightPosition;
-
         }
 
         /// <summary>
@@ -261,6 +255,5 @@ namespace KinematicsDemo.ViewModels
             _robotViewModel.LastSurfacePoint = m;
             _robotViewModel.RefreshDrawing();
         }
-
     }
 }

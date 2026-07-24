@@ -15,11 +15,9 @@ namespace KinematicsDemo.Views;
 /// </summary>
 public partial class RobotWindow : Window
 {
-
     private RobotArmViewModel _robotViewModel;
     private Point _mousePointOld = RobotArmViewModel.DefaultRandomPoint;
-    private MetaPoint _activePoint;
-
+    private MetaPoint? _activePoint;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RobotWindow"/> class.
@@ -31,7 +29,6 @@ public partial class RobotWindow : Window
         _robotViewModel.Refresh += ArmView_Refresh;
         DataContext = _robotViewModel;
         InitializeComponent();
-
     }
 
     /// <summary>
@@ -43,6 +40,7 @@ public partial class RobotWindow : Window
         {
             _activePoint = args.Point;
         }
+
         SKSurface.InvalidateVisual();
     }
 
@@ -85,7 +83,7 @@ public partial class RobotWindow : Window
         if (_robotViewModel.IsPointManuallyAdded == true)
         {
             //At this point ViewModel.MousePoint is the effector end - now just scale it 
-            _robotViewModel.MousePoint = new Point(_robotViewModel.MousePoint.X + info.Width / xRatio, _robotViewModel.MousePoint.Y + info.Height / yRatio);
+            _robotViewModel.MousePoint = new Point(_robotViewModel.MousePoint.X + (info.Width / xRatio), _robotViewModel.MousePoint.Y + (info.Height / yRatio));
             _robotViewModel.IsPointManuallyAdded = false;
         }
 
@@ -94,7 +92,7 @@ public partial class RobotWindow : Window
         {
             if (!_robotViewModel.IsPlaying)
             {
-                _robotViewModel.MousePoint = new Point(_robotViewModel.MousePoint.X - info.Width / xRatio, _robotViewModel.MousePoint.Y - info.Height / yRatio);
+                _robotViewModel.MousePoint = new Point(_robotViewModel.MousePoint.X - (info.Width / xRatio), _robotViewModel.MousePoint.Y - (info.Height / yRatio));
                 _mousePointOld = _robotViewModel.MousePoint;
             }
 
@@ -102,17 +100,16 @@ public partial class RobotWindow : Window
 
             // TODO: If on rail see if we can get closer to the mouse
             // var xDistanceToMouse = _mousePoint.X - _effectorSegment.PointB.X ;
-
             if (_robotViewModel.IsRecording && !_robotViewModel.IsPlaying)
             {
-
                 //RecordMetaPoint(new Point(_mousePoint.X, _mousePoint.Y));
                 // angleLock combines _isElbowLocked and _isWristLocked and _isShoulderLocked
                 var angleLock = (JointsLocks)(_robotViewModel.IsShoulderLocked ? 1 : 0) + (_robotViewModel.IsElbowLocked ? 2 : 0) + (_robotViewModel.IsWristLocked ? 4 : 0);
+
                 //_recordedMetaPoints.Add(new MetaPoint( new Point(_mousePoint.X, _mousePoint.Y),1,angleLock));
                 _robotViewModel.RecordPoint(new MetaPoint(
                     new Point(_robotViewModel.MousePoint.X, _robotViewModel.MousePoint.Y), 
-                    1,// speed (not used)
+                    1, // speed (not used)
                     angleLock, 
                     _robotViewModel.UpperArmSegment.Angle, 
                     _robotViewModel.ForearmSegment.Angle, 
@@ -136,15 +133,21 @@ public partial class RobotWindow : Window
     /// <param name="canvas">Canvas to draw on</param>
     private void DrawActivePoint(SKCanvas canvas)
     {
-        _robotViewModel.UpperArmSegment.Angle = KUtils.DegreeToRadian(_activePoint.ShoulderAngle);
-        _robotViewModel.ForearmSegment.Angle = KUtils.DegreeToRadian(_activePoint.ShoulderAngle + _activePoint.ElbowAngle);
-        _robotViewModel.EffectorSegment.Angle = KUtils.DegreeToRadian(_activePoint.ShoulderAngle + _activePoint.ElbowAngle + _activePoint.WristAngle);
+        if (_activePoint is not { } activePoint)
+        {
+            return;
+        }
+
+        _robotViewModel.UpperArmSegment.Angle = KUtils.DegreeToRadian(activePoint.ShoulderAngle);
+        _robotViewModel.ForearmSegment.Angle = KUtils.DegreeToRadian(activePoint.ShoulderAngle + activePoint.ElbowAngle);
+        _robotViewModel.EffectorSegment.Angle = KUtils.DegreeToRadian(activePoint.ShoulderAngle + activePoint.ElbowAngle + activePoint.WristAngle);
         _robotViewModel.UpperArmSegment.Update();
         _robotViewModel.ForearmSegment.Update();
         _robotViewModel.EffectorSegment.Update();
-        _robotViewModel.UpperArmSegment.RelativeAngle = _activePoint.ShoulderAngle;
-        _robotViewModel.ForearmSegment.RelativeAngle = _activePoint.ElbowAngle;
-        _robotViewModel.EffectorSegment.RelativeAngle = _activePoint.WristAngle;
+        _robotViewModel.UpperArmSegment.RelativeAngle = activePoint.ShoulderAngle;
+        _robotViewModel.ForearmSegment.RelativeAngle = activePoint.ElbowAngle;
+        _robotViewModel.EffectorSegment.RelativeAngle = activePoint.WristAngle;
+
         // Stick the arm to the base and put the arm back together
         _robotViewModel.UpperArmSegment.PointA = _robotViewModel.RobotArmOriginPosition;
         _robotViewModel.ForearmSegment.PointA = _robotViewModel.UpperArmSegment.PointB;
@@ -152,17 +155,17 @@ public partial class RobotWindow : Window
 
         if (_robotViewModel.IsShowingDetails)
         {
-            _robotViewModel.UpperArmSegment.Draw(canvas, SkiaColors.UpperArmPaint1, SkiaColors.JointPaint1, _activePoint.JointsLocks.HasFlag(JointsLocks.Shoulder));
-            _robotViewModel.ForearmSegment.Draw(canvas,  SkiaColors.ForearmPaint1,  SkiaColors.JointPaint1, _activePoint.JointsLocks.HasFlag(JointsLocks.Elbow));
-            _robotViewModel.EffectorSegment.Draw(canvas, SkiaColors.EffectorPaint1, SkiaColors.JointPaint1, _activePoint.JointsLocks.HasFlag(JointsLocks.Wrist), _activePoint.JointsLocks.HasFlag(JointsLocks.EffectorGrip));
+            _robotViewModel.UpperArmSegment.Draw(canvas, SkiaColors.UpperArmPaint1, SkiaColors.JointPaint1, activePoint.JointsLocks.HasFlag(JointsLocks.Shoulder));
+            _robotViewModel.ForearmSegment.Draw(canvas,  SkiaColors.ForearmPaint1,  SkiaColors.JointPaint1, activePoint.JointsLocks.HasFlag(JointsLocks.Elbow));
+            _robotViewModel.EffectorSegment.Draw(canvas, SkiaColors.EffectorPaint1, SkiaColors.JointPaint1, activePoint.JointsLocks.HasFlag(JointsLocks.Wrist), activePoint.JointsLocks.HasFlag(JointsLocks.EffectorGrip));
         }
     }
 
     protected override void OnActivated(EventArgs e)
     {
-
         base.OnActivated(e);
         SKSurface.InvalidateVisual();
+
         //if (_robotArmCanvasOrigin == new Point(0, 0))
         //{
         //    var top = Canvas.GetTop(RobotArmCanvas);
@@ -181,7 +184,6 @@ public partial class RobotWindow : Window
         Point prevPoint = new Point(0, 0);
         foreach (MetaPoint p in _robotViewModel.RecordedMetaPoints.Points)
         {
-
             canvas.DrawCircle((float)p.MousePoint.X, (float)p.MousePoint.Y, 4, SkiaColors.MouseRecordingPaint);
             if (prevPoint != new Point(0, 0))
             {
@@ -204,7 +206,6 @@ public partial class RobotWindow : Window
         DrawScale(canvas, rc);
     }
 
-
     /// <summary>
     ///  Draw 10 cm scale in the lower right corner knowing that 1 px = 1mm
     /// </summary>
@@ -223,7 +224,7 @@ public partial class RobotWindow : Window
         // Draw ticks on the scale every 1 cm
         for (int i = 0; i <= scale; i++)
         {
-            var markStart = new Point(scaleStart.X + i * 10, scaleStart.Y);
+            var markStart = new Point(scaleStart.X + (i * 10), scaleStart.Y);
             var markEnd = new Point(markStart.X, markStart.Y + scaleHeight);
             canvas.DrawLine((float)markStart.X, (float)markStart.Y, (float)markEnd.X, (float)markEnd.Y, SkiaColors.EffectorPaint);
         }

@@ -10,7 +10,6 @@ namespace KinematicsDemo.Services.ToastService;
 /// </summary>
 public partial class ToastWindow : Window
 {
-
     ObservableCollection<ToastAlert> _alerts = new ObservableCollection<ToastAlert>();
     bool _isListReversed = true;
 
@@ -20,11 +19,11 @@ public partial class ToastWindow : Window
         if(reverseListVisual== false)
         {
             _isListReversed=reverseListVisual;
+
             // todo: flip the ToastList 
             ListScale.ScaleY = 1;
         }
     }
-
 
     private void WindowDrag(object sender, MouseButtonEventArgs e)
     {
@@ -34,25 +33,28 @@ public partial class ToastWindow : Window
         }
         catch (Exception)
         {
-
         }
     }
 
     public void AddToast(string message, BadgeTypeEnum badgeType, int timeout, bool isClosable)
     {
-        ToastAlert alert = new ToastAlert( message,  badgeType,  timeout,  isClosable,_isListReversed);
+        ToastAlert alert = new ToastAlert( message,  badgeType,  timeout,  isClosable, _isListReversed);
         alert.Closed += Alert_Closed;
         ToastList.Items.Insert(0, alert); // allows the fluidLayout behavior to work
     }
 
-    private void Alert_Closed(object sender, EventArgs e)
+    private void Alert_Closed(object? sender, EventArgs e)
     {
-        var alert = sender as ToastAlert;
+        if (sender is not ToastAlert alert)
+        {
+            return;
+        }
+
         ToastList.Items.Remove(sender); // allows the fluidLayout behavior to work
         alert.Closed -= Alert_Closed;
     }
-
 }
+
 // Not Used in this project yet
 public enum AnimationType
 {
@@ -75,4 +77,3 @@ public enum BadgeTypeEnum
     Red,
     Blue
 }
-

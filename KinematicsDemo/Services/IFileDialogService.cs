@@ -1,5 +1,5 @@
-﻿using KinematicsDemo.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using KinematicsDemo.Models;
 
 namespace KinematicsDemo.Services;
 
@@ -41,4 +41,3 @@ public interface IFileDialogService
     /// <returns>true if saved sucessfiully</returns>
     bool SaveMetaPointsToFile(RobotActionRecording recording);
 }
-

@@ -96,7 +96,7 @@ public partial class App : Application
             IToastService toastService = Services.GetService<IToastService>() ?? throw new ArgumentNullException(nameof(toastService));
             IToolWindowService toolWindowService = Services.GetService<IToolWindowService>() ?? throw new ArgumentNullException(nameof(toolWindowService));
             RobotArmViewModel robotArmViewModel = new RobotArmViewModel(
-                0, heightRange,0,railRange, upperArmSegment, forearmSegment, effectorSegment, messageBoxService, fileDialogService, toastService, toolWindowService);
+                0, heightRange, 0, railRange, upperArmSegment, forearmSegment, effectorSegment, messageBoxService, fileDialogService, toastService, toolWindowService);
             MainWindow = new RobotWindow(robotArmViewModel);
             RobotMcpTool.Robot = robotArmViewModel;
 
@@ -108,5 +108,4 @@ public partial class App : Application
         // Display the main window
         MainWindow.Show();
     }
-
 }

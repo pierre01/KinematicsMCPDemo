@@ -14,18 +14,18 @@ public static class ApiKeyProvider
     public static async Task<string> GetApiKeyAsync()
     {
 #if WINDOWS || MACCATALYST || LINUX
-        return Environment.GetEnvironmentVariable("MY_AI_API_KEY", EnvironmentVariableTarget.User); // Or Machine
+        return Environment.GetEnvironmentVariable("MY_AI_API_KEY", EnvironmentVariableTarget.User) ?? string.Empty; // Or Machine
 #else
-        return await SecureStorage.GetAsync("MY_AI_API_KEY");
+        return await SecureStorage.GetAsync("MY_AI_API_KEY") ?? string.Empty;
 #endif
     }
 
     public static async Task<string> GetAiOrgId()
     {
 #if WINDOWS || MACCATALYST || LINUX
-        return Environment.GetEnvironmentVariable("MY_AI_ORG_KEY", EnvironmentVariableTarget.User); // Or Machine
+        return Environment.GetEnvironmentVariable("MY_AI_ORG_KEY", EnvironmentVariableTarget.User) ?? string.Empty; // Or Machine
 #else
-        return await SecureStorage.GetAsync("MY_AI_ORG_KEY");
+        return await SecureStorage.GetAsync("MY_AI_ORG_KEY") ?? string.Empty;
 #endif
     }
 }

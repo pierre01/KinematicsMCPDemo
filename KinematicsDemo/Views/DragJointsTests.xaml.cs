@@ -1,5 +1,4 @@
-﻿using Microsoft.Xaml.Behaviors.Layout;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Microsoft.Xaml.Behaviors.Layout;
 
 namespace KinematicsDemo.Views
 {
@@ -27,12 +27,12 @@ namespace KinematicsDemo.Views
 
         private void StraightJoint_Dragging(object sender, MouseEventArgs e)
         {
-
         }
 
         private void StraightJoint_DragFinished(object sender, MouseEventArgs e)
         {
             var dragBehavior = (MouseDragElementBehavior)sender;
+
             //  e.GetPosition
             XDragTextBox.Text= $"x drag: {dragBehavior.X}";
             YDragTextBox.Text= $"Y drag: {dragBehavior.Y}";
@@ -44,7 +44,7 @@ namespace KinematicsDemo.Views
             XDragTextBox.Text= $"XEllipse: {Canvas.GetLeft(RailDragEllipse)}";
             YDragTextBox.Text= $"YEllipse: {Canvas.GetTop(RailDragEllipse)}";
             var y = dragBehavior.Y - Canvas.GetTop(RailCanvas);
-            Canvas.SetTop(ArmCanvas,y);
+            Canvas.SetTop(ArmCanvas, y);
         }
 
         private void VerticalJoint_DragFinished(object sender, MouseEventArgs e)

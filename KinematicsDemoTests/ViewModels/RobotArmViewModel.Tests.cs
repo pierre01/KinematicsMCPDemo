@@ -25,9 +25,10 @@ public class RobotArmViewModelTests
         var forearmSegment = new Segment(upperArmSegment, 210, 0, -167, 167);
         var effectorSegment = new Segment(forearmSegment, 144, 0, -970, 970);
         var heightRange = new KRange(-200, 200); // 40 cm  mast
+        var railRange = new KRange(-500, 500); // 1 meter rail
          
         
-       _robotArmViewModel = new RobotArmViewModel(0, heightRange, upperArmSegment, forearmSegment, effectorSegment,
+       _robotArmViewModel = new RobotArmViewModel(0, heightRange, 0, railRange, upperArmSegment, forearmSegment, effectorSegment,
                 _messageBoxServiceMock.Object, _allServices, _allServices,_allServices);
         _robotArmViewModel.Refresh += _robotArmViewModel_Refresh;
 
@@ -130,5 +131,37 @@ public class RobotArmViewModelTests
 
         // Assert
         Assert.IsFalse(_refreshed);
+    }
+
+    [TestMethod]
+    public void GoForward_IncreasesRailPosition()
+    {
+        var initialPosition = _robotArmViewModel.ArmRailPosition;
+
+        _robotArmViewModel.GoForwardCommand.Execute(25d);
+
+        Assert.AreEqual(initialPosition + 25d, _robotArmViewModel.ArmRailPosition);
+    }
+
+    [TestMethod]
+    public void GoBackward_DecreasesRailPosition()
+    {
+        var initialPosition = _robotArmViewModel.ArmRailPosition;
+
+        _robotArmViewModel.GoBackwardCommand.Execute(25d);
+
+        Assert.AreEqual(initialPosition - 25d, _robotArmViewModel.ArmRailPosition);
+    }
+
+    [TestMethod]
+    public void GoUpAndDown_UsePositiveMagnitude()
+    {
+        var initialPosition = _robotArmViewModel.ArmHeightPosition;
+
+        _robotArmViewModel.GoUpCommand.Execute(25d);
+        Assert.AreEqual(initialPosition + 25d, _robotArmViewModel.ArmHeightPosition);
+
+        _robotArmViewModel.GoDownCommand.Execute(25d);
+        Assert.AreEqual(initialPosition, _robotArmViewModel.ArmHeightPosition);
     }
 }

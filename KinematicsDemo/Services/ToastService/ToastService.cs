@@ -14,15 +14,16 @@ namespace KinematicsDemo.Services.ToastService;
 /// </summary>
 public class ToastService : IToastService
 {
-
     public static ToastService Instance { get; } = new ToastService();
 
-    private ToastService() { }
+    private ToastService()
+    {
+    }
 
-    ToastWindow _screenBottomRightWindow;
-    ToastWindow _appTopCenterWindow;
-    ToastWindow _appBottomRightWindow;
-    ToastWindow _screenBottomLeftWindow;
+    ToastWindow? _screenBottomRightWindow;
+    ToastWindow? _appTopCenterWindow;
+    ToastWindow? _appBottomRightWindow;
+    ToastWindow? _screenBottomLeftWindow;
 
     Rect _windowRect;
 
@@ -37,20 +38,20 @@ public class ToastService : IToastService
     /// <param name="isClosable">Does the toast includes a close button</param>
     public void ShowToast(string message, ToastLocation location, BadgeTypeEnum badgeType, int timeout, bool isClosable = true)
     {
-
-
         if (location == ToastLocation.ScreenBottomLeft)
         {
             if (_screenBottomLeftWindow == null)
             {
                 _screenBottomLeftWindow = new ToastWindow();
                 _screenBottomLeftWindow.Owner = App.Current.MainWindow;
+
                 // Get the main Display info
                 var rc = SystemParameters.WorkArea;
                 _screenBottomLeftWindow.Top = rc.Bottom - _screenBottomLeftWindow.Height;
                 _screenBottomLeftWindow.Left = rc.Left;
                 _screenBottomLeftWindow.Show();
             }
+
             _screenBottomLeftWindow.AddToast(message, badgeType, timeout, isClosable);
         }
         else
@@ -63,8 +64,9 @@ public class ToastService : IToastService
             {
                 _appBottomRightWindow = new ToastWindow();
                 _appBottomRightWindow.Owner = App.Current.MainWindow;
+
                 // Get the main Display info
-                _appBottomRightWindow.Top = rc.Bottom - _appBottomRightWindow.Height - 4;// TODO: Should be window.border height
+                _appBottomRightWindow.Top = rc.Bottom - _appBottomRightWindow.Height - 4; // TODO: Should be window.border height
                 _appBottomRightWindow.Left = rc.Right - _appBottomRightWindow.Width - 40;
                 _appBottomRightWindow.Show();
                 _windowRect = rc;
@@ -90,9 +92,10 @@ public class ToastService : IToastService
             {
                 _appTopCenterWindow = new ToastWindow(false);
                 _appTopCenterWindow.Owner = App.Current.MainWindow;
+
                 // Get the main Display info
-                _appTopCenterWindow.Top = rc.Top + 20;// TODO: Should be window.border height
-                _appTopCenterWindow.Left = rc.Left + rc.Width / 2 - _appTopCenterWindow.Width / 2;
+                _appTopCenterWindow.Top = rc.Top + 20; // TODO: Should be window.border height
+                _appTopCenterWindow.Left = rc.Left + (rc.Width / 2) - (_appTopCenterWindow.Width / 2);
                 _appTopCenterWindow.Show();
                 _windowRect = rc;
             }
@@ -101,7 +104,7 @@ public class ToastService : IToastService
                 if (rc != _windowRect)
                 {
                     _appTopCenterWindow.Top = rc.Top + 20; // TODO: Should be window.border height
-                    _appTopCenterWindow.Left = rc.Left + rc.Width / 2 - _appTopCenterWindow.Width / 2;
+                    _appTopCenterWindow.Left = rc.Left + (rc.Width / 2) - (_appTopCenterWindow.Width / 2);
                     _windowRect = rc;
                 }
             }
@@ -114,12 +117,14 @@ public class ToastService : IToastService
             {
                 _screenBottomRightWindow = new ToastWindow();
                 _screenBottomRightWindow.Owner = App.Current.MainWindow;
+
                 // Get the main Display info
                 var rc = SystemParameters.WorkArea;
                 _screenBottomRightWindow.Top = rc.Bottom - _screenBottomRightWindow.Height;
                 _screenBottomRightWindow.Left = rc.Right - _screenBottomRightWindow.Width - 40;
                 _screenBottomRightWindow.Show();
             }
+
             _screenBottomRightWindow.AddToast(message, badgeType, timeout, isClosable);
         }
     }

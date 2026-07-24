@@ -1,5 +1,5 @@
-﻿using KinematicsDemo.Models;
-using System;
+﻿using System;
+using KinematicsDemo.Models;
 
 namespace KinematicsDemo.ViewModels
 {
@@ -13,7 +13,6 @@ namespace KinematicsDemo.ViewModels
 
         public RefreshDrawingEventArgs()
         {
-
         }
 
         public RefreshDrawingEventArgs(MetaPoint point)

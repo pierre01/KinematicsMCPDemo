@@ -1,9 +1,9 @@
-﻿using KinematicsDemo.Models;
+﻿using System;
+using System.IO;
+using KinematicsDemo.Models;
 using KinematicsDemo.Services.MessageBoxService;
 using Microsoft.Win32;
 using Newtonsoft.Json;
-using System;
-using System.IO;
 
 namespace KinematicsDemo.Services;
 
@@ -12,13 +12,13 @@ namespace KinematicsDemo.Services;
 /// </summary>
 public class FileDialog : IFileDialogService
 {
-    public string FilePath { get; set; } = "";
+    public string FilePath { get; set; } = string.Empty;
 
-    public string Filter { get; set; } = "";
+    public string Filter { get; set; } = string.Empty;
 
-    public string Title { get; set; } = "";
+    public string Title { get; set; } = string.Empty;
 
-    public string InitialDirectory { get; set; } = "";
+    public string InitialDirectory { get; set; } = string.Empty;
 
     IMessageBoxService _messageBoxService;
 
@@ -49,7 +49,11 @@ public class FileDialog : IFileDialogService
                 using (StreamReader sr = new StreamReader(loadPath))
                 {
                     string json = sr.ReadToEnd();
-                    if (string.IsNullOrEmpty(json)) return new RobotActionRecording();
+                    if (string.IsNullOrEmpty(json))
+                    {
+                        return new RobotActionRecording();
+                    }
+
                     var recording = JsonConvert.DeserializeObject<RobotActionRecording>(json);
                     return recording == null ? new RobotActionRecording() : recording;
                 }
@@ -96,14 +100,11 @@ public class FileDialog : IFileDialogService
                 }
                 catch (Exception ex)
                 {
-
                     _messageBoxService.Show("Exception Occured While Loading the File :" + ex.Message);
                 }
             }
-
         }
 
         return false;
     }
-
 }
