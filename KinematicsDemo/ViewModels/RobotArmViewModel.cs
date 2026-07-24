@@ -64,6 +64,7 @@ public partial class RobotArmViewModel : ObservableObject
         _effectorSegment = new Segment(_forearmSegment, 144, 0, -970, 970);
         MastPositionRange = new KRange(-200, 200); // 40 cm  mast
         RailPositionRange = new KRange(-500, 500); // 1 meter rail - if no rail , then 0
+        InitializeEffectorTarget();
     }
 
     /// <summary>
@@ -121,9 +122,7 @@ public partial class RobotArmViewModel : ObservableObject
         _toastService = toastService;
         FullyExtendedLenght = upperArmSegment.Length + forearmSegment.Length + effectorSegment.Length;
 
-        // MousePoint = new Point(_upperArmSegment.Length+_forearmSegment.Length+_effectorSegment.Length, 0);
-        MousePoint = DefaultRandomPoint;
-        LastSurfacePoint = DefaultRandomPoint;
+        InitializeEffectorTarget();
     }
 
     /// <summary>
@@ -166,9 +165,7 @@ public partial class RobotArmViewModel : ObservableObject
         _fileDialog = fileDialog;
         _toastService = toastService;
 
-        //     MousePoint = new Point(_upperArmSegment.Length+_forearmSegment.Length+_effectorSegment.Length, 0);
-        MousePoint = DefaultRandomPoint;
-        LastSurfacePoint = DefaultRandomPoint;
+        InitializeEffectorTarget();
     }
 
     /// <summary>
@@ -197,12 +194,21 @@ public partial class RobotArmViewModel : ObservableObject
         _toolWindowService = toolWindowService;
         MastPositionRange = new KRange(0, 400); // 40 cm  mast
         _toastService = toastService;
-        MousePoint = new Point(_upperArmSegment.Length + _forearmSegment.Length + _effectorSegment.Length, 0);
-
-        //MousePoint = DefaultRandomPoint;
+        InitializeEffectorTarget();
         _toastService = toastService;
     }
     #endregion
+
+    /// <summary>
+    /// Initializes command targets from the real end-effector position so the
+    /// first command does not depend on the view completing a render pass.
+    /// </summary>
+    private void InitializeEffectorTarget()
+    {
+        MousePoint = EffectorSegment.PointB;
+        LastSurfacePoint = EffectorSegment.PointB;
+        IsMousePointInRobotCoordinates = true;
+    }
     
     /// <summary>
     /// If true it will Display Kinematics Skia Graphics on top of robot arm
@@ -220,6 +226,13 @@ public partial class RobotArmViewModel : ObservableObject
     /// </summary>
     [ObservableProperty]
     public partial Point MousePoint { get; set; }
+
+    /// <summary>
+    /// True when <see cref="MousePoint"/> is already relative to the robot origin.
+    /// The view uses this to avoid applying its screen-to-robot translation to
+    /// points supplied by commands and MCP tools.
+    /// </summary>
+    public bool IsMousePointInRobotCoordinates { get; set; }
 
     [ObservableProperty]
     public partial Point MouseCoordinates{ get; set; }
@@ -491,12 +504,24 @@ public partial class RobotArmViewModel : ObservableObject
     [RelayCommand]
     private void GoHome()
     {
+        ArmRailPosition = RailPositionRange?.GetClosestValueInRange(0) ?? 0;
+        ArmHeightPosition = MastPositionRange.GetClosestValueInRange(0);
+        RobotArmOriginPosition = new Point(ArmRailPosition, ArmHeightPosition);
+
         UpperArmSegment.Angle = 0;
         ForearmSegment.Angle = 0;
         EffectorSegment.Angle = 0;
-        UpperArmSegment.Update();
-        ForearmSegment.Update();
-        EffectorSegment.Update();
+        UpperArmSegment.RelativeAngle = 0;
+        ForearmSegment.RelativeAngle = 0;
+        EffectorSegment.RelativeAngle = 0;
+
+        UpperArmSegment.PointA = RobotArmOriginPosition;
+        ForearmSegment.PointA = UpperArmSegment.PointB;
+        EffectorSegment.PointA = ForearmSegment.PointB;
+
+        MousePoint = EffectorSegment.PointB;
+        LastSurfacePoint = EffectorSegment.PointB;
+        IsMousePointInRobotCoordinates = true;
         Refresh?.Invoke(this, RefreshDrawingEventArgs.Empty);
 
         //_messageBox.Show("Robot Arm Homed...","Robot",MessageBoxServiceButton.Ok);   
@@ -576,7 +601,7 @@ public partial class RobotArmViewModel : ObservableObject
         var angleLock = (JointsLocks)(IsShoulderLocked ? 1 : 0) + (IsElbowLocked ? 2 : 0) + (IsWristLocked ? 4 : 0);
 
         //_recordedMetaPoints.Add(new MetaPoint( new Point(_mousePoint.X, _mousePoint.Y),1,angleLock));
-        IsPointManuallyAdded = true;
+        IsMousePointInRobotCoordinates = true;
         Refresh?.Invoke(this, RefreshDrawingEventArgs.Empty);
         RecordedMetaPoints.Add(new MetaPoint(
             EffectorSegment.PointB, 
@@ -1023,6 +1048,8 @@ public partial class RobotArmViewModel : ObservableObject
     /// <param name="canvas">The canvas to draw on</param>
     public void RunInverseKinematics(double deltaTolerance, SKCanvas canvas)
     {
+        SeedRetractFromFullyExtendedPose();
+
         // ---- Inverse kinematics Loop ----
         for (int i = 0; i < AdjustIterations; i++) //  iterations to make it closer to the goal
         {
@@ -1120,6 +1147,35 @@ public partial class RobotArmViewModel : ObservableObject
                 break;
             }
         }
+    }
+
+    /// <summary>
+    /// Breaks the fully extended collinear singularity when the target asks the
+    /// arm to retract. Without a small bend, every inverse-kinematics iteration
+    /// remains on the same line and the rigid links cannot move inward.
+    /// </summary>
+    private void SeedRetractFromFullyExtendedPose()
+    {
+        const double angleTolerance = 0.000001;
+        const double distanceTolerance = 0.001;
+        const double seedAngleDegrees = 1;
+
+        bool isFullyStraight =
+            Math.Abs(UpperArmSegment.Angle - ForearmSegment.Angle) < angleTolerance &&
+            Math.Abs(ForearmSegment.Angle - EffectorSegment.Angle) < angleTolerance;
+
+        double targetDistance = KUtils.GetDistanceBetweenTwoPoints(RobotArmOriginPosition, MousePoint);
+        double currentReach = KUtils.GetDistanceBetweenTwoPoints(RobotArmOriginPosition, EffectorSegment.PointB);
+        if (!isFullyStraight || targetDistance >= currentReach - distanceTolerance)
+        {
+            return;
+        }
+
+        double seedAngle = KUtils.DegreeToRadian(seedAngleDegrees);
+        ForearmSegment.Angle = UpperArmSegment.Angle + seedAngle;
+        EffectorSegment.Angle = ForearmSegment.Angle;
+        ForearmSegment.PointA = UpperArmSegment.PointB;
+        EffectorSegment.PointA = ForearmSegment.PointB;
     }
 
     /// <summary>

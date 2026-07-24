@@ -47,7 +47,7 @@ public partial class RobotWindow : Window
     private void SKSurface_MouseDown(object sender, MouseButtonEventArgs e)
     {
         _robotViewModel.MousePoint = e.GetPosition(SKSurface);
-        _robotViewModel.LastSurfacePoint = e.GetPosition(SKSurface);
+        _robotViewModel.IsMousePointInRobotCoordinates = false;
         SKSurface.InvalidateVisual();
     }
 
@@ -79,20 +79,20 @@ public partial class RobotWindow : Window
             return;
         }
 
-        // We clicked on Add Point button to record the end of the effector
-        if (_robotViewModel.IsPointManuallyAdded == true)
-        {
-            //At this point ViewModel.MousePoint is the effector end - now just scale it 
-            _robotViewModel.MousePoint = new Point(_robotViewModel.MousePoint.X + (info.Width / xRatio), _robotViewModel.MousePoint.Y + (info.Height / yRatio));
-            _robotViewModel.IsPointManuallyAdded = false;
-        }
-
         // follow the mouse if it changed position
         if (_mousePointOld != _robotViewModel.MousePoint)
         {
             if (!_robotViewModel.IsPlaying)
             {
-                _robotViewModel.MousePoint = new Point(_robotViewModel.MousePoint.X - (info.Width / xRatio), _robotViewModel.MousePoint.Y - (info.Height / yRatio));
+                if (!_robotViewModel.IsMousePointInRobotCoordinates)
+                {
+                    _robotViewModel.MousePoint = new Point(
+                        _robotViewModel.MousePoint.X - (info.Width / xRatio),
+                        _robotViewModel.MousePoint.Y - (info.Height / yRatio));
+                }
+
+                _robotViewModel.IsMousePointInRobotCoordinates = false;
+                _robotViewModel.LastSurfacePoint = _robotViewModel.MousePoint;
                 _mousePointOld = _robotViewModel.MousePoint;
             }
 

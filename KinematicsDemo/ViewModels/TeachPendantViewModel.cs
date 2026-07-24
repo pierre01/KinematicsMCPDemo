@@ -253,6 +253,7 @@ namespace KinematicsDemo.ViewModels
         {
             _robotViewModel.MousePoint = m;
             _robotViewModel.LastSurfacePoint = m;
+            _robotViewModel.IsMousePointInRobotCoordinates = true;
             _robotViewModel.RefreshDrawing();
         }
     }

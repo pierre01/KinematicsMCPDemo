@@ -134,6 +134,14 @@ public class RobotArmViewModelTests
     }
 
     [TestMethod]
+    public void Initialization_UsesEffectorPositionForFirstCommand()
+    {
+        Assert.AreEqual(_robotArmViewModel.EffectorSegment.PointB, _robotArmViewModel.MousePoint);
+        Assert.AreEqual(_robotArmViewModel.EffectorSegment.PointB, _robotArmViewModel.LastSurfacePoint);
+        Assert.IsTrue(_robotArmViewModel.IsMousePointInRobotCoordinates);
+    }
+
+    [TestMethod]
     public void GoForward_IncreasesRailPosition()
     {
         var initialPosition = _robotArmViewModel.ArmRailPosition;
@@ -163,5 +171,50 @@ public class RobotArmViewModelTests
 
         _robotArmViewModel.GoDownCommand.Execute(25d);
         Assert.AreEqual(initialPosition, _robotArmViewModel.ArmHeightPosition);
+    }
+
+    [TestMethod]
+    public void GoHome_ResetsAllAxesAndReportedEffectorPosition()
+    {
+        _robotArmViewModel.GoForwardCommand.Execute(25d);
+        _robotArmViewModel.GoUpCommand.Execute(25d);
+        _robotArmViewModel.UpperArmSegment.Angle = 0.5;
+        _robotArmViewModel.ForearmSegment.Angle = -0.25;
+        _robotArmViewModel.EffectorSegment.Angle = 0.75;
+        _robotArmViewModel.UpperArmSegment.RelativeAngle = 30;
+        _robotArmViewModel.ForearmSegment.RelativeAngle = -45;
+        _robotArmViewModel.EffectorSegment.RelativeAngle = 60;
+        _robotArmViewModel.MousePoint = new System.Windows.Point(100, 100);
+
+        _robotArmViewModel.GoHomeCommand.Execute(null);
+
+        Assert.AreEqual(0, _robotArmViewModel.ArmRailPosition);
+        Assert.AreEqual(0, _robotArmViewModel.ArmHeightPosition);
+        Assert.AreEqual(0, _robotArmViewModel.UpperArmSegment.Angle);
+        Assert.AreEqual(0, _robotArmViewModel.ForearmSegment.Angle);
+        Assert.AreEqual(0, _robotArmViewModel.EffectorSegment.Angle);
+        Assert.AreEqual(0, _robotArmViewModel.UpperArmSegment.RelativeAngle);
+        Assert.AreEqual(0, _robotArmViewModel.ForearmSegment.RelativeAngle);
+        Assert.AreEqual(0, _robotArmViewModel.EffectorSegment.RelativeAngle);
+        Assert.AreEqual(new System.Windows.Point(579, 0), _robotArmViewModel.EffectorSegment.PointB);
+        Assert.AreEqual(_robotArmViewModel.EffectorSegment.PointB, _robotArmViewModel.MousePoint);
+        Assert.AreEqual(_robotArmViewModel.EffectorSegment.PointB, _robotArmViewModel.LastSurfacePoint);
+        Assert.IsTrue(_robotArmViewModel.IsMousePointInRobotCoordinates);
+        Assert.IsTrue(_refreshed);
+    }
+
+    [TestMethod]
+    public void RetractFromHome_ArticulatesArm()
+    {
+        _robotArmViewModel.GoHomeCommand.Execute(null);
+        _robotArmViewModel.MousePoint = new System.Windows.Point(529, 0);
+
+        _robotArmViewModel.RunInverseKinematics(_robotArmViewModel.Precision, null!);
+
+        Assert.AreNotEqual(
+            _robotArmViewModel.UpperArmSegment.Angle,
+            _robotArmViewModel.ForearmSegment.Angle,
+            0.0001);
+        Assert.IsTrue(_robotArmViewModel.EffectorSegment.PointB.X < 579);
     }
 }

@@ -47,6 +47,8 @@ public class SemanticKernelService : ISemanticKernelService
                     AuthorRole.System,
                     "Control the robot by calling the matching tool immediately. " +
                     "Use millimeters, treat movement commands as relative deltas, and trust the tool result as the new absolute position. " +
+                    "For left movement always call MoveLeft with a positive distance. For right movement always call MoveRight with a positive distance. " +
+                    "Do not use the signed lateral parameter of MoveBy for left or right requests. " +
                     "Execute every requested step exactly once. Multi-step instructions may use multiple tool calls in their stated order. " +
                     "Do not immediately repeat an identical tool call unless the user explicitly requested consecutive repetition. " +
                     "When the user says 'again', repeat the most recent requested action exactly once with the same arguments. " +
