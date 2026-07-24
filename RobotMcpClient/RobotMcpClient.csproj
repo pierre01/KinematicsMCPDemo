@@ -68,14 +68,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CommunityToolkit.Maui" Version="13.0.0" />
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.10" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
-		<PackageReference Include="Microsoft.SemanticKernel.Connectors.OpenAI" Version="1.67.1" />
-		<PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.67.1" />
-		<PackageReference Include="ModelContextProtocol" Version="0.4.0-preview.3" />
-		<PackageReference Include="Stef.ModelContextProtocol.SemanticKernel" Version="0.6.0" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="14.2.2" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.90" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.10" />
+		<PackageReference Include="Microsoft.SemanticKernel.Connectors.OpenAI" Version="1.78.0" />
+		<PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.78.0" />
+		<PackageReference Include="Stef.ModelContextProtocol.SemanticKernel" Version="0.10.0" />
 	</ItemGroup>
 
 </Project>

@@ -119,6 +119,7 @@ public partial class RobotArmViewModel : ObservableObject
         IsShowingDetails = true;
         _messageBox = messageBoxService;
         _fileDialog = fileDialog;
+        _toastService = toastService;
         FullyExtendedLenght = upperArmSegment.Length + forearmSegment.Length + effectorSegment.Length;
         // MousePoint = new Point(_upperArmSegment.Length+_forearmSegment.Length+_effectorSegment.Length, 0);
 
@@ -190,6 +191,7 @@ public partial class RobotArmViewModel : ObservableObject
         _effectorSegment = effectorSegment;
         _messageBox = messageBoxService;
         _fileDialog = fileDialog;
+        _toastService = toastService;
         _toolWindowService = toolWindowService;
         MastPositionRange = new KRange(0, 400); // 40 cm  mast
         _toastService = toastService;

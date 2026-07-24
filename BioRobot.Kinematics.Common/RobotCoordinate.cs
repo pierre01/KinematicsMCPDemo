@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace Biosero.Kinematics.Common;
+namespace BioRobot.Kinematics.Common;
 
 public class RobotCoordinate(double x, double y, double z, double rail)
 {

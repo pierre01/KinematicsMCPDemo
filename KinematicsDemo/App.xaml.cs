@@ -1,5 +1,5 @@
-﻿// <copyright file="App.xaml.cs" company="Biosero">
-// Copyright (c) Biosero. All rights reserved.
+﻿// <copyright file="App.xaml.cs" company="BioRobot">
+// Copyright (c) BioRobot. All rights reserved.
 // </copyright>
 
 using System;
@@ -96,7 +96,7 @@ public partial class App : Application
             IToastService toastService = Services.GetService<IToastService>() ?? throw new ArgumentNullException(nameof(toastService));
             IToolWindowService toolWindowService = Services.GetService<IToolWindowService>() ?? throw new ArgumentNullException(nameof(toolWindowService));
             RobotArmViewModel robotArmViewModel = new RobotArmViewModel(
-                0, heightRange, upperArmSegment, forearmSegment, effectorSegment, messageBoxService, fileDialogService, toastService, toolWindowService);
+                0, heightRange,0,railRange, upperArmSegment, forearmSegment, effectorSegment, messageBoxService, fileDialogService, toastService, toolWindowService);
             MainWindow = new RobotWindow(robotArmViewModel);
             RobotMcpTool.Robot = robotArmViewModel;
 

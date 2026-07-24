@@ -15,7 +15,7 @@ public class SemanticKernelService : ISemanticKernelService
 
     // ===== MCP transport config (override via env vars) =====
     // MCP_WS_URL: ws://localhost:5059/mcp (when WS)
-    private static readonly string McpWsUrl = Environment.GetEnvironmentVariable("MCP_WS_URL") ?? "https://localhost:6805/mcp/";  //"ws://localhost:6805/mcp/"
+    private static readonly string McpWsUrl = Environment.GetEnvironmentVariable("MCP_WS_URL") ?? "https://localhost:6805/mcp/sse";
 
     private ChatHistory? _history;
     private IKernelBuilder? _builder;
@@ -40,7 +40,7 @@ public class SemanticKernelService : ISemanticKernelService
             await Task.Delay(10000);
 
             // If you keep cloud as an option, set useLocal = true/false to toggle
-            var useLocal = true;
+            var useLocal = false;
 
             _reducer = new ChatHistoryTruncationReducer(targetCount: 40, thresholdCount: 60);
 
@@ -87,7 +87,7 @@ public class SemanticKernelService : ISemanticKernelService
                 // Register the local vLLM endpoint with Semantic Kernel
                 _builder.AddOpenAIChatCompletion(
                     apiKey: "local-key",
-                    modelId: "openai/gpt-oss-20b",            // must match --served-model-name
+                    modelId: "qwen/qwen3.6-35b-a3b",            // must match --served-model-name"openai/gpt-oss-20b"
                     orgId: null,
                     serviceId: serviceID,
                     httpClient: httpsClient
@@ -101,18 +101,18 @@ public class SemanticKernelService : ISemanticKernelService
             // Optimized for robot control with tool use
             _openAIPromptExecutionSettings = new()
             {
-                Temperature = 0.15,
-                TopP = 0.4,
-                FrequencyPenalty = 0,
-                PresencePenalty = 0, 
-                //ReasoningEffort = "minimal",
+                //Temperature = 1,
+                //TopP = 0.4,
+                //FrequencyPenalty = 0,
+                //PresencePenalty = 0, 
+                ////ReasoningEffort = "minimal",
 
                 // This is the key line – lets the model pick functions
                 ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
 
                 // Low MaxTokens does not reduce tool-call reliability.
                 // MaxTokens reduces natural-language verbosity — nothing else.
-                MaxTokens = 256
+                MaxTokens = 8000
             };
 
             _kernel = _builder.Build();
@@ -170,7 +170,7 @@ public class SemanticKernelService : ISemanticKernelService
     /// <summary>
     /// Chat with tool use (MCP functions auto-invoked when needed).
     /// </summary>
-    public async Task<KernelPluginResult> GetResponseAsync(string prompt)
+    public async Task<KernelPluginResult> GetResponseAsync(string prompt, CancellationToken cancellationToken)
     {
         var response = new KernelPluginResult();
         try
@@ -255,6 +255,8 @@ public class SemanticKernelService : ISemanticKernelService
         }
         return response;
     }
+
+
 }
 
 /// <summary>

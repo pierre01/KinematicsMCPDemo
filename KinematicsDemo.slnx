@@ -1,12 +1,13 @@
-<Solution>
+﻿<Solution>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path="README.md" />
+    <File Path="TextFile.md" />
   </Folder>
-  <Project Path="Biosero.Kinematics.Common/Biosero.Kinematics.Common.csproj" Id="d568510c-28b7-4cfb-8dc9-cbadf7913db4" />
-  <Project Path="KinematicsDemo/KinematicsDemo.csproj" />
-  <Project Path="KinematicsDemoTests/KinematicsDemoTests.csproj" />
-  <Project Path="RobotMcpClient/RobotMcpClient.csproj">
+  <Project Path="D:/Dev/AI/KinematicsMCPDemo/BioRobot.Kinematics.Common/BioRobot.Kinematics.Common.csproj" Id="d568510c-28b7-4cfb-8dc9-cbadf7913db4" />
+  <Project Path="D:/Dev/AI/KinematicsMCPDemo/KinematicsDemo/KinematicsDemo.csproj" />
+  <Project Path="D:/Dev/AI/KinematicsMCPDemo/KinematicsDemoTests/KinematicsDemoTests.csproj" />
+  <Project Path="D:/Dev/AI/KinematicsMCPDemo/RobotMcpClient/RobotMcpClient.csproj">
     <Deploy Solution="Debug|*" />
   </Project>
 </Solution>

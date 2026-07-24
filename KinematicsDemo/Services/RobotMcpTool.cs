@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-using Biosero.Kinematics.Common;
+using BioRobot.Kinematics.Common;
 using KinematicsDemo.ViewModels;
 using ModelContextProtocol.Server;
 
@@ -31,21 +31,21 @@ public static class RobotMcpTool
     /// </summary>
     /// <param name="railChangeBy">The amount, in millimeters, to move the robot arm along the rail axis. Can be positive or negative to indicate
     /// direction.</param>
-    /// <param name="armExtendBy">The amount, in millimeters, to move the robot arm along the X axis. Can be positive or negative to indicate direction.</param>
-    /// <param name="armLeftRightBy">The amount, in millimeters, to move the robot arm along the Y axis. Can be positive or negative to indicate direction.</param>
-    /// <param name="armUpDownBy">The amount, in millimeters, to move the robot arm along the Z axis. Can be positive or negative to indicate direction.</param>
+    /// <param name="armExtendOrRetractBy">The amount, in millimeters, to move the robot arm along the X axis. Can be positive or negative to indicate direction.</param>
+    /// <param name="armLeftOrRightBy">The amount, in millimeters, to move the robot arm along the Y axis. Can be positive or negative to indicate direction.</param>
+    /// <param name="armUpOrDownBy">The amount, in millimeters, to move the robot arm along the Z axis. Can be positive or negative to indicate direction.</param>
     /// <returns>A RobotCoordinate representing the new position of the robot arm after the movement.</returns>
     [McpServerTool]
     [Description("Moves the robot arm by a specified distance (in millimeters) along each axis. Positive and negative values indicate direction.The robot moves relative to its current position. (values are not cummulative acreoss call)")]
     public static async Task<RobotCoordinate> MoveBy(
             [Description("Distance to move along the rail axis (usually the base linear track). Positive values move the robot forward on the rail (away from the home position). Negative values move it backward on the rail (toward the home position). instructions should include the word rail (e.g. rail forward, rail backward)")]
             double railChangeBy = 0,
-            [Description("Distance to move along the X-axis in the robot's local coordinate system. Positive values move the arm to reach forward / extend. Negative values retract the arm (towards the mast)).")]
-            double armExtendBy = 0,
+            [Description("Distance to move along the X-axis in the robot's local coordinate system. Positive values move the arm to extend. Negative values retract the arm (towards the mast)).")]
+            double armExtendOrRetractBy = 0,
             [Description("Distance to move along the Y-axis in the robot's local coordinate system. Positive values move the arm to the Left. Negative values move it to the right.")]
-            double armLeftRightBy = 0,
+            double armLeftOrRightBy = 0,
             [Description("Distance to move along the Z-axis (vertical mast). Positive values move the arm up / upward. Negative values move it down / downward.")]
-            double armUpDownBy = 0)
+            double armUpOrDownBy = 0)
     {
 
         if (Robot == null)
@@ -68,33 +68,33 @@ public static class RobotMcpTool
                     Robot?.GoBackwardCommand.Execute(-railChangeBy);
                 }
 
-                if (armUpDownBy > 0)
+                if (armUpOrDownBy > 0)
                 {
-                    Robot?.GoUpCommand.Execute(armUpDownBy);
+                    Robot?.GoUpCommand.Execute(armUpOrDownBy);
                 }
-                else if (armUpDownBy < 0)
+                else if (armUpOrDownBy < 0)
                 {
-                    Robot?.GoDownCommand.Execute(-armUpDownBy);
+                    Robot?.GoDownCommand.Execute(-armUpOrDownBy);
                 }
 
                 // TODO: Needs to be optimized
                 var m = Robot.LastSurfacePoint;
-                if (armExtendBy > 0)
+                if (armExtendOrRetractBy > 0)
                 {
-                    m.X += armExtendBy;
+                    m.X += armExtendOrRetractBy;
                 }
-                else if (armExtendBy < 0)
+                else if (armExtendOrRetractBy < 0)
                 {
-                    m.X += armExtendBy;
+                    m.X += armExtendOrRetractBy;
                 }
 
-                if (armLeftRightBy > 0)
+                if (armLeftOrRightBy > 0)
                 {
-                    m.Y -= armLeftRightBy;
+                    m.Y += armLeftOrRightBy;
                 }
-                else if (armLeftRightBy < 0)
+                else if (armLeftOrRightBy < 0)
                 {
-                    m.Y -= armLeftRightBy;
+                    m.Y += armLeftOrRightBy;
                 }
 
                 UpdateAndRefresh(m);
