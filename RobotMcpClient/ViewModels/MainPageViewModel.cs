@@ -84,11 +84,12 @@ public partial class MainPageViewModel : ObservableObject
     public partial string ButtonImage { get; set; } = "microphone_off.png";
 
 
-    [RelayCommand(CanExecute = nameof(CanSendRequest)) ]
-    private async Task SendRequest()
+    [RelayCommand(CanExecute = nameof(CanSendRequest), IncludeCancelCommand = true)]
+    private async Task SendRequestAsync(CancellationToken token)
     {
         IsProgressVisible = true;
-        await GetResponseAsync(CallTextInput);
+        await GetResponseAsync(CallTextInput, token);
+
         IsProgressVisible = false;
     }
 
@@ -177,9 +178,10 @@ public partial class MainPageViewModel : ObservableObject
     }
     #endregion
 
-    public async Task GetResponseAsync(string prompt)
+    public async Task GetResponseAsync(string prompt, CancellationToken cancellationToken)
     {
-        var result = await _semanticKernelService.GetResponseAsync(prompt);
+        var result = await _semanticKernelService.GetResponseAsync(prompt,cancellationToken);
+
         if (result.IsSuccess)
         {
             CallTextResult = result.Result;
@@ -194,6 +196,7 @@ public partial class MainPageViewModel : ObservableObject
         {
             CallTextResult = result.Result;
         }
+
     }
 }
 

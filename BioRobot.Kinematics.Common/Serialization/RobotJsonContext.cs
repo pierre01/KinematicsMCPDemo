@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Biosero.Kinematics.Common.Serialization;
+namespace BioRobot.Kinematics.Common.Serialization;
 
 [JsonSerializable(typeof(string[]))]
 [JsonSerializable(typeof(int[]))]

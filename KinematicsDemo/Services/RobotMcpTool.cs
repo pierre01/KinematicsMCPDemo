@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-using Biosero.Kinematics.Common;
+using BioRobot.Kinematics.Common;
 using KinematicsDemo.ViewModels;
 using ModelContextProtocol.Server;
 

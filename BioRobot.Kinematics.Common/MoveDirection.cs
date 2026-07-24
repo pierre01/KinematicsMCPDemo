@@ -1,4 +1,4 @@
-﻿namespace Biosero.Kinematics.Common;
+﻿namespace BioRobot.Kinematics.Common;
 
 public enum MoveDirection
 {

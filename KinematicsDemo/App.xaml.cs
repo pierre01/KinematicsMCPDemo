@@ -1,5 +1,5 @@
-﻿// <copyright file="App.xaml.cs" company="Biosero">
-// Copyright (c) Biosero. All rights reserved.
+﻿// <copyright file="App.xaml.cs" company="BioRobot">
+// Copyright (c) BioRobot. All rights reserved.
 // </copyright>
 
 using System;

@@ -4,7 +4,8 @@
     "Projects": [
       {
         "Path": "KinematicsDemo\\KinematicsDemo.csproj",
-        "Action": "Start"
+        "Action": "Start",
+        "DebugTarget": "http"
       },
       {
         "Path": "RobotMcpClient\\RobotMcpClient.csproj",
