@@ -10,7 +10,7 @@
     MaxWidth="460"
     MaxHeight="200"
     d:Title="Warning!"
-    Icon="/AppIcon.ico"
+    Icon="/appicon.ico"
     ResizeMode="NoResize"
     ShowInTaskbar="False"
     WindowStartupLocation="CenterScreen"

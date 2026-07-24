@@ -118,7 +118,6 @@ public class KUtilsTests
     }
 
     [TestMethod()]
-    [ExpectedException(typeof(ArgumentException))]
     public void GetClosestAngleBetweenTwoAnglesTest()
     {
 
@@ -151,12 +150,12 @@ public class KUtilsTests
         res = KUtils.GetClosestAngleBetweenTwoAngles(OneEightyDegInRad, -93, 93);
         res = KUtils.RadianToDegree(res);
         rVal = Math.Round(res, Precision);
-        Assert.IsTrue(rVal == 180);
+        Assert.AreEqual(93, rVal);
 
         res = KUtils.GetClosestAngleBetweenTwoAngles(OneEightyDegInRad, -168, 168);
         res = KUtils.RadianToDegree(res);
         rVal = Math.Round(res, Precision);
-        Assert.IsTrue(rVal == 180);
+        Assert.AreEqual(168, rVal);
 
         res = KUtils.GetClosestAngleBetweenTwoAngles(OneEightyDegInRad, -960, 960);
         res = KUtils.RadianToDegree(res);
@@ -166,9 +165,14 @@ public class KUtilsTests
         res = KUtils.GetClosestAngleBetweenTwoAngles(ThreeSixtyDegInRad, -960, 960);
         res = KUtils.RadianToDegree(res);
         rVal = Math.Round(res, Precision);
-        Assert.IsTrue(rVal == 360);
+        Assert.AreEqual(0, rVal);
 
-        res = KUtils.GetClosestAngleBetweenTwoAngles(0, 5, -5); // Throws an exception because minAngle > maxAngle
+    }
 
+    [TestMethod]
+    public void GetClosestAngleBetweenTwoAngles_MinGreaterThanMax_ThrowsArgumentException()
+    {
+        Assert.ThrowsExactly<ArgumentException>(
+            () => KUtils.GetClosestAngleBetweenTwoAngles(0, 5, -5));
     }
 }

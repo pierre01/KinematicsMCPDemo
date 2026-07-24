@@ -10,7 +10,6 @@ public class KUtilsTest04
     public class ClosestPointOnCircumferenceTests
     {
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void ClosestPointOnCircumference_RadiusLessThanZero_ThrowsArgumentException()
         {
             // Arrange
@@ -19,9 +18,8 @@ public class KUtilsTest04
             double radius = -1;
 
             // Act
-            KUtils.ClosestPointOnCircumference(pointA, center, radius);
-
-            // Assert is handled by ExpectedException
+            Assert.ThrowsExactly<ArgumentException>(
+                () => KUtils.ClosestPointOnCircumference(pointA, center, radius));
         }
 
     [TestMethod]
@@ -51,7 +49,6 @@ public class KUtilsTest04
     }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void ClosestPointOnCircumference_PointAEqualsCenter_ThrowsArgumentException()
         {
             // Arrange
@@ -60,9 +57,8 @@ public class KUtilsTest04
             double radius = 5;
 
             // Act
-            KUtils.ClosestPointOnCircumference(pointA, center, radius);
-
-            // Assert is handled by ExpectedException
+            Assert.ThrowsExactly<ArgumentException>(
+                () => KUtils.ClosestPointOnCircumference(pointA, center, radius));
         }
 
         [TestMethod]
