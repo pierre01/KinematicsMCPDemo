@@ -5,12 +5,14 @@ using ModelContextProtocol.SemanticKernel.Extensions;
 using RobotMcpClient.Services.Interfaces;
 using System.Diagnostics;
 using System.Net.Security;
+using System.Text;
+using System.Text.Json.Nodes;
 
 namespace RobotMcpClient.Services;
 
 public class SemanticKernelService : ISemanticKernelService
 {
-    private const int MaxResponseTokens = 512;
+    private const int MaxResponseTokens = 1024;
     private const int HistoryTargetCount = 12;
     private const int HistoryThresholdCount = 20;
 
@@ -45,7 +47,8 @@ public class SemanticKernelService : ISemanticKernelService
                     AuthorRole.System,
                     "Control the robot by calling the matching tool immediately. " +
                     "Use millimeters, treat movement commands as relative deltas, and trust the tool result as the new absolute position. " +
-                    "Execute exactly one tool call for each user-requested action. After a tool succeeds, do not call it again in the same turn. " +
+                    "Execute every requested step exactly once. Multi-step instructions may use multiple tool calls in their stated order. " +
+                    "Do not immediately repeat an identical tool call unless the user explicitly requested consecutive repetition. " +
                     "When the user says 'again', repeat the most recent requested action exactly once with the same arguments. " +
                     "Do not reconstruct or debate prior coordinates. Keep the final response to one short sentence.")
             ];
@@ -94,7 +97,7 @@ public class SemanticKernelService : ISemanticKernelService
                     }
                 };
 
-                var httpsClient = new HttpClient(handler)
+                var httpsClient = new HttpClient(new QwenReasoningNoneHandler(handler))
                 {
                     BaseAddress = new Uri("http://127.0.0.1:8931/v1")
                 };
@@ -116,8 +119,6 @@ public class SemanticKernelService : ISemanticKernelService
             // Optimized for robot control with tool use
             _openAIPromptExecutionSettings = new()
             {
-                ReasoningEffort = "minimal",
-
                 // This is the key line – lets the model pick functions
                 ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
 
@@ -140,6 +141,7 @@ public class SemanticKernelService : ISemanticKernelService
 
             // Optional: inspect/trace tool invocations
             _kernel.FunctionInvocationFilters.Add(new FunctionInvocationFilter());
+            _kernel.AutoFunctionInvocationFilters.Add(new DuplicateToolCallFilter());
 
             _chatCompletionService = _kernel.GetRequiredService<IChatCompletionService>(serviceID);
 
@@ -285,6 +287,100 @@ public class SemanticKernelService : ISemanticKernelService
     }
 
 
+}
+
+/// <summary>
+/// Disables reasoning through the OpenAI-compatible API after the connector
+/// has validated its request. The API maps "none" to Qwen's internal "off"
+/// setting; sending "off" directly is rejected by the API layer.
+/// </summary>
+public sealed class QwenReasoningNoneHandler(HttpMessageHandler innerHandler)
+    : DelegatingHandler(innerHandler)
+{
+    protected override async Task<HttpResponseMessage> SendAsync(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken)
+    {
+        if (request.Content is not null &&
+            request.RequestUri?.AbsolutePath.EndsWith(
+                "/chat/completions",
+                StringComparison.OrdinalIgnoreCase) == true)
+        {
+            var json = await request.Content.ReadAsStringAsync(cancellationToken);
+            if (JsonNode.Parse(json) is JsonObject body)
+            {
+                body["reasoning_effort"] = "none";
+                request.Content = new StringContent(
+                    body.ToJsonString(),
+                    Encoding.UTF8,
+                    "application/json");
+            }
+        }
+
+        return await base.SendAsync(request, cancellationToken);
+    }
+}
+
+/// <summary>
+/// Stops a runaway model from immediately repeating the same tool with the same
+/// arguments while still permitting an intentional sequence of different steps.
+/// </summary>
+public sealed class DuplicateToolCallFilter : IAutoFunctionInvocationFilter
+{
+    private readonly object _sync = new();
+    private string? _previousCallSignature;
+
+    public async Task OnAutoFunctionInvocationAsync(
+        AutoFunctionInvocationContext context,
+        Func<AutoFunctionInvocationContext, Task> next)
+    {
+        var signature = CreateSignature(context);
+        var isDuplicate = false;
+
+        lock (_sync)
+        {
+            if (context.RequestSequenceIndex == 0 && context.FunctionSequenceIndex == 0)
+            {
+                _previousCallSignature = null;
+            }
+
+            isDuplicate = string.Equals(
+                _previousCallSignature,
+                signature,
+                StringComparison.Ordinal);
+
+            if (!isDuplicate)
+            {
+                _previousCallSignature = signature;
+            }
+        }
+
+        if (!isDuplicate)
+        {
+            await next(context);
+            return;
+        }
+
+        Debug.WriteLine(
+            $"Blocked duplicate tool call {context.Function.Name} " +
+            $"(request {context.RequestSequenceIndex}, function {context.FunctionSequenceIndex}).");
+
+        context.Result = new FunctionResult(
+            context.Function,
+            "Skipped duplicate: this exact tool call was already executed immediately before this call.");
+        context.Terminate = true;
+    }
+
+    private static string CreateSignature(AutoFunctionInvocationContext context)
+    {
+        var arguments = string.Join(
+            "|",
+            (context.Arguments ?? [])
+                .OrderBy(argument => argument.Key, StringComparer.Ordinal)
+                .Select(argument => $"{argument.Key}={argument.Value}"));
+
+        return $"{context.Function.PluginName}.{context.Function.Name}|{arguments}";
+    }
 }
 
 /// <summary>
