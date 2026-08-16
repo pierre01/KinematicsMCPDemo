@@ -9,6 +9,8 @@ namespace KinematicsDemo.Views;
 /// <summary>Perspective Skia renderer for the rail-mounted robot.</summary>
 internal sealed class RobotPerspectiveRenderer
 {
+    private const float ArmBaseOffsetX = 125;
+
     private Vector3 camera, forward, right, up;
     private float focal, cx, cy;
 
@@ -28,7 +30,15 @@ internal sealed class RobotPerspectiveRenderer
         Box(c, new((min + max) / 2, 0, 24), new(max - min + 160, 90, 48), new(120, 134, 143));
         Box(c, new(bx, 0, 65), new(150, 130, 45), new(166, 178, 186));
         Box(c, new(bx, 0, 70 + mast / 2), new(105, 105, mast), new(190, 198, 204));
-        Box(c, new(bx - 55, 0, z), new(28, 128, 105), new(69, 82, 91));
+
+        // Recessed vertical guides on the rail-facing side of the mast.
+        Box(c, new(bx + 54, -25, 82 + mast / 2), new(4, 10, mast - 34), new(47, 54, 58));
+        Box(c, new(bx + 54, 25, 82 + mast / 2), new(4, 10, mast - 34), new(47, 54, 58));
+
+        // The carriage projects out from the mast. The shoulder axis sits in
+        // front of this housing rather than inside the mast column.
+        Box(c, new(bx + 82, 0, z), new(66, 112, 105), new(109, 122, 131));
+        Box(c, new(bx + 112, 0, z), new(28, 96, 78), new(76, 89, 98));
 
         Point o = vm.RobotArmOriginPosition;
         Vector3 shoulder = World(vm.UpperArmSegment.PointA, o, bx, z);
@@ -79,7 +89,7 @@ internal sealed class RobotPerspectiveRenderer
         // The legacy kinematics plane uses screen coordinates (positive Y is down).
         // The 3D world uses a conventional horizontal Y axis, so the Y component
         // must be reflected when crossing the boundary in either direction.
-        return new(o.X + hit.X - vm.ArmRailPosition, o.Y - hit.Y);
+        return new(o.X + hit.X - vm.ArmRailPosition - ArmBaseOffsetX, o.Y - hit.Y);
     }
 
     private void SetCamera(SKImageInfo i, RobotArmViewModel vm)
@@ -101,7 +111,7 @@ internal sealed class RobotPerspectiveRenderer
         cy = height * .54f;
     }
 
-    private static Vector3 World(Point p, Point o, float bx, float z) => new(bx + (float)(p.X - o.X), -(float)(p.Y - o.Y), z);
+    private static Vector3 World(Point p, Point o, float bx, float z) => new(bx + ArmBaseOffsetX + (float)(p.X - o.X), -(float)(p.Y - o.Y), z);
     private SKPoint Project(Vector3 p, out float depth) { Vector3 d = p - camera; depth = Vector3.Dot(d, forward); float q = focal / Math.Max(1, depth); return new(cx + Vector3.Dot(d, right) * q, cy - Vector3.Dot(d, up) * q); }
     private static SKPaint Paint(SKColor color, float width) => new() { Color = color, StrokeWidth = width, StrokeCap = SKStrokeCap.Round, IsAntialias = true };
     private void Line(SKCanvas c, Vector3 a, Vector3 b, SKPaint paint) { SKPoint p1 = Project(a, out _), p2 = Project(b, out _); c.DrawLine(p1, p2, paint); }
