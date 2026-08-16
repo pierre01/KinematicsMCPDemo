@@ -45,9 +45,9 @@ internal sealed class RobotPerspectiveRenderer
         Vector3 elbow = World(vm.UpperArmSegment.PointB, o, bx, z);
         Vector3 wrist = World(vm.ForearmSegment.PointB, o, bx, z);
         Vector3 grip = World(vm.EffectorSegment.PointB, o, bx, z);
-        Link(c, shoulder, elbow, 58, new(78, 98, 112)); Joint(c, shoulder, 43);
-        Link(c, elbow, wrist, 46, new(111, 134, 150)); Joint(c, elbow, 34);
-        Link(c, wrist, grip, 29, new(154, 181, 199)); Joint(c, wrist, 25);
+        Link(c, shoulder, elbow, 58, new(78, 98, 112)); Joint(c, shoulder, 12);
+        Link(c, elbow, wrist, 46, new(111, 134, 150)); Joint(c, elbow, 10);
+        Link(c, wrist, grip, 29, new(154, 181, 199)); Joint(c, wrist, 8);
         Gripper(c, wrist, grip, vm.IsEffectorGripped);
 
         using var path = Paint(new(245, 148, 0, 190), 3);
@@ -132,7 +132,29 @@ internal sealed class RobotPerspectiveRenderer
     }
 
     private void Link(SKCanvas c, Vector3 a, Vector3 b, float width, SKColor color) { SKPoint p1=Project(a,out float d1),p2=Project(b,out float d2); float w=width*focal/Math.Max(1,(d1+d2)/2); using var shadow=Paint(new(30,36,40,80),w+7);c.DrawLine(p1.X+4,p1.Y+6,p2.X+4,p2.Y+6,shadow);using var body=Paint(color,w);c.DrawLine(p1,p2,body); }
-    private void Joint(SKCanvas c, Vector3 v, float radius) { SKPoint p=Project(v,out float d);float r=radius*focal/Math.Max(1,d);using var fill=new SKPaint{Color=new(65,80,90),IsAntialias=true};c.DrawCircle(p,r,fill);using var shine=new SKPaint{Color=new(225,235,240,130),Style=SKPaintStyle.Stroke,StrokeWidth=3,IsAntialias=true};c.DrawArc(new(p.X-r*.65f,p.Y-r*.65f,p.X+r*.65f,p.Y+r*.65f),205,105,false,shine); }
+    private void Joint(SKCanvas c, Vector3 v, float radius)
+    {
+        SKPoint p = Project(v, out float d);
+        float r = radius * focal / Math.Max(1, d);
+
+        // Keep the joint face uniformly shaded. A curved specular highlight here
+        // makes the circular pivot read as a ball instead of a flat mechanical disc.
+        using var fill = new SKPaint
+        {
+            Color = new(65, 80, 90),
+            IsAntialias = true
+        };
+        using var rim = new SKPaint
+        {
+            Color = new(46, 58, 66),
+            Style = SKPaintStyle.Stroke,
+            StrokeWidth = 1.5f,
+            IsAntialias = true
+        };
+
+        c.DrawCircle(p, r, fill);
+        c.DrawCircle(p, r, rim);
+    }
     private void Gripper(SKCanvas c, Vector3 wrist, Vector3 grip, bool closed) { Vector3 d=Vector3.Normalize(grip-wrist),side=Vector3.Normalize(Vector3.Cross(d,Vector3.UnitZ));float s=closed?14:31;using var p=Paint(new(45,54,59),5);Line(c,grip-side*s,grip+side*s,p);Line(c,grip-side*s,grip-side*s+d*38,p);Line(c,grip+side*s,grip+side*s+d*38,p); }
     private void Target(SKCanvas c, Vector3 v) { SKPoint p=Project(v,out _);using var q=new SKPaint{Color=new(239,81,63),StrokeWidth=2.5f,Style=SKPaintStyle.Stroke,IsAntialias=true};c.DrawCircle(p,8,q);c.DrawLine(p.X-12,p.Y,p.X+12,p.Y,q);c.DrawLine(p.X,p.Y-12,p.X,p.Y+12,q); }
 }
