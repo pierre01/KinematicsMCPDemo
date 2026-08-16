@@ -107,7 +107,7 @@ public class SemanticKernelService : ISemanticKernelService
                 // Register the local vLLM endpoint with Semantic Kernel
                 _builder.AddOpenAIChatCompletion(
                     apiKey: "local-key",
-                    modelId: "qwen/qwen3.6-35b-a3b",            // must match --served-model-name"openai/gpt-oss-20b"
+                    modelId: "qwen/qwen3.8-27b",            // must match --served-model-name"openai/gpt-oss-20b" or "qwen/qwen3.6-35b-a3b"
                     orgId: null,
                     serviceId: serviceID,
                     httpClient: httpsClient
