@@ -420,11 +420,33 @@ public partial class RobotArmViewModel : ObservableObject
     public partial double ArmRailPosition{ get; set; }
 
     /// <summary>
+    /// Redraw the perspective view as soon as the rail carriage moves.
+    /// </summary>
+    /// <param name="value">The new rail position.</param>
+    partial void OnArmRailPositionChanged(double value)
+    {
+        GoForwardCommand.NotifyCanExecuteChanged();
+        GoBackwardCommand.NotifyCanExecuteChanged();
+        Refresh?.Invoke(this, RefreshDrawingEventArgs.Empty);
+    }
+
+    /// <summary>
     /// Y coordinate on the Mast (zero based)
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RobotArmOriginPosition))]
     public partial double ArmHeightPosition{ get; set; }
+
+    /// <summary>
+    /// Redraw the perspective view as soon as the mast carriage moves.
+    /// </summary>
+    /// <param name="value">The new mast height.</param>
+    partial void OnArmHeightPositionChanged(double value)
+    {
+        GoUpCommand.NotifyCanExecuteChanged();
+        GoDownCommand.NotifyCanExecuteChanged();
+        Refresh?.Invoke(this, RefreshDrawingEventArgs.Empty);
+    }
 
     /// <summary>
     /// Gets or sets the maximum vertical position, in units, that the arm can reach.

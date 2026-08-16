@@ -149,6 +149,7 @@ public class RobotArmViewModelTests
         _robotArmViewModel.GoForwardCommand.Execute(25d);
 
         Assert.AreEqual(initialPosition + 25d, _robotArmViewModel.ArmRailPosition);
+        Assert.IsTrue(_refreshed);
     }
 
     [TestMethod]
@@ -159,6 +160,7 @@ public class RobotArmViewModelTests
         _robotArmViewModel.GoBackwardCommand.Execute(25d);
 
         Assert.AreEqual(initialPosition - 25d, _robotArmViewModel.ArmRailPosition);
+        Assert.IsTrue(_refreshed);
     }
 
     [TestMethod]
@@ -168,9 +170,12 @@ public class RobotArmViewModelTests
 
         _robotArmViewModel.GoUpCommand.Execute(25d);
         Assert.AreEqual(initialPosition + 25d, _robotArmViewModel.ArmHeightPosition);
+        Assert.IsTrue(_refreshed);
 
+        _refreshed = false;
         _robotArmViewModel.GoDownCommand.Execute(25d);
         Assert.AreEqual(initialPosition, _robotArmViewModel.ArmHeightPosition);
+        Assert.IsTrue(_refreshed);
     }
 
     [TestMethod]
