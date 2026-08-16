@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using KinematicsDemo.Models;
 using KinematicsDemo.Styles;
 using KinematicsDemo.ViewModels;
@@ -18,6 +19,7 @@ public partial class RobotWindow : Window
     private RobotArmViewModel _robotViewModel;
     private Point _mousePointOld = RobotArmViewModel.DefaultRandomPoint;
     private MetaPoint? _activePoint;
+    private readonly RobotPerspectiveRenderer _perspectiveRenderer = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RobotWindow"/> class.
@@ -41,14 +43,26 @@ public partial class RobotWindow : Window
             _activePoint = args.Point;
         }
 
-        SKSurface.InvalidateVisual();
+        Robot3DSurface.InvalidateVisual();
     }
 
     private void SKSurface_MouseDown(object sender, MouseButtonEventArgs e)
     {
-        _robotViewModel.MousePoint = e.GetPosition(SKSurface);
-        _robotViewModel.IsMousePointInRobotCoordinates = false;
-        SKSurface.InvalidateVisual();
+        DpiScale dpi = VisualTreeHelper.GetDpi(Robot3DSurface);
+        _robotViewModel.MousePoint = _perspectiveRenderer.ScreenToRobotPlane(
+            e.GetPosition(Robot3DSurface),
+            Robot3DSurface.ActualWidth,
+            Robot3DSurface.ActualHeight,
+            dpi.DpiScaleX,
+            dpi.DpiScaleY,
+            _robotViewModel);
+        _robotViewModel.IsMousePointInRobotCoordinates = true;
+        Robot3DSurface.InvalidateVisual();
+    }
+
+    private void Robot3DSurface_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        Robot3DSurface.InvalidateVisual();
     }
 
     private void DrawSegments(object sender, SkiaSharp.Views.Desktop.SKPaintSurfaceEventArgs e)
@@ -75,7 +89,7 @@ public partial class RobotWindow : Window
         if (_robotViewModel.IsPlaying)
         {
             DrawActivePoint(canvas);
-            DrawGraphicDetails(canvas, rc);
+            _perspectiveRenderer.Draw(canvas, info, _robotViewModel);
             return;
         }
 
@@ -124,6 +138,7 @@ public partial class RobotWindow : Window
         canvas.DrawCircle((float)_robotViewModel.MousePoint.X, (float)_robotViewModel.MousePoint.Y, 6, SkiaColors.MousePaint);
 
         DrawGraphicDetails(canvas, rc);
+        _perspectiveRenderer.Draw(canvas, info, _robotViewModel);
     }
 
     /// <summary>
@@ -164,7 +179,7 @@ public partial class RobotWindow : Window
     protected override void OnActivated(EventArgs e)
     {
         base.OnActivated(e);
-        SKSurface.InvalidateVisual();
+        Robot3DSurface.InvalidateVisual();
 
         //if (_robotArmCanvasOrigin == new Point(0, 0))
         //{
