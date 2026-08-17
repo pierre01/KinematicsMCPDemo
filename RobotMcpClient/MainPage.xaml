@@ -9,7 +9,7 @@
     <Grid
         Padding="8"
         ColumnDefinitions="Auto,*,Auto"
-        RowDefinitions="Auto,Auto,Auto,Auto,Auto,*">
+        RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*">
 
         <Label
             Grid.Row="1"
@@ -47,9 +47,9 @@
         <Editor
             Grid.Row="2"
             Grid.ColumnSpan="3"
-            Margin="0,0,0,8"
+            Margin="0,0,0,0"
             BackgroundColor="{StaticResource Secondary}"
-            HeightRequest="200"
+            HeightRequest="160"
             HorizontalOptions="Fill"
             Text="{Binding CallTextInput}"
             TextColor="{StaticResource Tertiary}" />
@@ -57,24 +57,25 @@
         <ImageButton
             Grid.Row="3"
             Grid.Column="0"
-            Margin="8"
+            Margin="0,4,0,16"
             Command="{Binding SendRequestCommand}"
             HeightRequest="40"
-            HorizontalOptions="End"
+            HorizontalOptions="Start"
             Source="clippy.png"
-            WidthRequest="40" />
+            WidthRequest="40" Background="{StaticResource Secondary}" />
         <HorizontalStackLayout
             Grid.Row="3"
             Grid.Column="1"
-            Grid.ColumnSpan="2">
-            <ActivityIndicator Margin="8,0,0,0" IsVisible="{Binding IsProgressVisible}"  IsRunning="{Binding IsProgressVisible}" WidthRequest="32" HeightRequest="32"  />
+            Grid.ColumnSpan="3">
             <Label
-                Margin="8,0,0,0"
-                FontSize="18"
+                Margin="0,0,0,0"
+                
                 HorizontalOptions="Start"
-                Text="Kernel response"
+                Text="Submit Prompt..."
                 VerticalOptions="Center" />
+            <ActivityIndicator Margin="8,0,0,0" IsVisible="{Binding IsProgressVisible}"  IsRunning="{Binding IsProgressVisible}" WidthRequest="32" HeightRequest="32"  />
         </HorizontalStackLayout>
+
         <Grid
             Grid.Row="4"
             Grid.ColumnSpan="3"
@@ -143,7 +144,7 @@
                 HorizontalOptions="Start"
                 Text="{Binding TotalTokens, StringFormat='{}{0:0,0} tokens'}"
                 VerticalOptions="Center" />
-            
+
             <Label
                 Grid.Row="2"
                 Grid.Column="0"
@@ -175,12 +176,18 @@
                 FontAttributes="Bold"
                 FontSize="14"
                 HorizontalOptions="Start"
-                Text="{Binding TokensPerSecond, StringFormat='{}{0:0,0.0} T/S'}"
+                Text="{Binding TokensPerSecond, StringFormat='{}{0:0,0.0} t/s'}"
                 VerticalOptions="Center" />
 
 
         </Grid>
-        <ScrollView Grid.Row="5" Grid.ColumnSpan="3">
+        <Label Grid.Row="5" Grid.ColumnSpan="3"
+                Margin="0,4,0,4"
+                FontSize="18"
+                HorizontalOptions="Start"
+                Text="Response:"
+                VerticalOptions="Center" />
+        <ScrollView Grid.Row="6" Grid.ColumnSpan="3">
             <Editor
                 AutoSize="TextChanges"
                 BackgroundColor="{StaticResource Secondary}"
