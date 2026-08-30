@@ -80,16 +80,7 @@ public class McpService : IMCPServer, IAsyncDisposable
         };
 
         builder.Services.AddMcpServer()
-               .WithHttpTransport(options =>
-               {
-                   // RobotMcpClient currently uses the legacy SSE Semantic Kernel
-                   // adapter. Keep sessions enabled and expose /sse and /message
-                   // until that client is migrated to Streamable HTTP.
-                   options.Stateless = false;
-#pragma warning disable MCP9004 // Legacy SSE is required by RobotMcpClient.
-                   options.EnableLegacySse = true;
-#pragma warning restore MCP9004
-               })
+               .WithHttpTransport(options => options.Stateless = false)
                .WithToolsFromAssembly(serializerOptions: toolSerializerOptions);
 
         _webApp = builder.Build();

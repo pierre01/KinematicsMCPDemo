@@ -198,12 +198,10 @@ public static class RobotMcpTool
     [Description("Play the list of recorded positions")]
     public static async Task PlayRecordedPoints()
     {
-        await Application.Current.Dispatcher.InvokeAsync(
-        () =>
-        {
-            Robot?.PlayCommand.Execute(null);
-        },
-        DispatcherPriority.Send);
+        Task playbackTask = await Application.Current.Dispatcher.InvokeAsync(
+            () => Robot?.PlayCommand.ExecuteAsync(null) ?? Task.CompletedTask,
+            DispatcherPriority.Send);
+        await playbackTask;
     }
 
     [McpServerTool]
@@ -259,8 +257,8 @@ public static class RobotMcpTool
         if (Robot != null)
         {
             var coordinate = new RobotCoordinate(
-                Robot.MousePoint.X,
-                -Robot.MousePoint.Y,
+                Robot.EffectorSegment.PointB.X,
+                -Robot.EffectorSegment.PointB.Y,
                 Robot.ArmHeightPosition,
                 Robot.ArmRailPosition);
 
@@ -314,8 +312,10 @@ public static class RobotMcpTool
         {
             // We are on the UI thread
             Robot.MousePoint = m;
-            Robot.LastSurfacePoint = m;
             Robot.IsMousePointInRobotCoordinates = true;
+            Robot.RunInverseKinematics(Robot.Precision, null!);
+            Robot.MousePoint = Robot.EffectorSegment.PointB;
+            Robot.LastSurfacePoint = Robot.EffectorSegment.PointB;
             Robot.RefreshDrawing();
         }
         else
@@ -326,8 +326,10 @@ public static class RobotMcpTool
                 if (Robot is { } robot)
                 {
                     robot.MousePoint = m;
-                    robot.LastSurfacePoint = m;
                     robot.IsMousePointInRobotCoordinates = true;
+                    robot.RunInverseKinematics(robot.Precision, null!);
+                    robot.MousePoint = robot.EffectorSegment.PointB;
+                    robot.LastSurfacePoint = robot.EffectorSegment.PointB;
                     robot.RefreshDrawing();
                 }
             },

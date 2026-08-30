@@ -17,7 +17,7 @@ The robot can move on the Z AXis by moving up and down a mast, whilst moving the
 * SkiaSharp for the overlay kinematic graphics
 * **The MCP server is started at the begining of the WPF app**
 * MAUI for the mobile client
-* Semantic Kernel  in the MAUI Client to talk to the MCP server using OpenAI GPT LLM to call on the server commands
+* Microsoft Agent Framework in the MAUI client, using the official MCP .NET client over Streamable HTTP to expose robot commands to an OpenAI-compatible model
 
 
 

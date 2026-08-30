@@ -221,5 +221,71 @@ public class RobotArmViewModelTests
             _robotArmViewModel.ForearmSegment.Angle,
             0.0001);
         Assert.IsTrue(_robotArmViewModel.EffectorSegment.PointB.X < 579);
+        Assert.AreEqual(529, _robotArmViewModel.EffectorSegment.PointB.X, 5,
+            $"Expected the end effector to approach X=529, but it reached {_robotArmViewModel.EffectorSegment.PointB.X}.");
+    }
+
+    [TestMethod]
+    public void ConsecutiveRetracts_WithMastMove_ContinueToMoveEffector()
+    {
+        _robotArmViewModel.GoHomeCommand.Execute(null);
+
+        var firstTarget = _robotArmViewModel.EffectorSegment.PointB;
+        firstTarget.X -= 50.8;
+        _robotArmViewModel.MousePoint = firstTarget;
+        _robotArmViewModel.RunInverseKinematics(_robotArmViewModel.Precision, null!);
+        var firstReached = _robotArmViewModel.EffectorSegment.PointB;
+
+        _robotArmViewModel.GoUpCommand.Execute(24d);
+        var raisedPosition = _robotArmViewModel.EffectorSegment.PointB;
+        Assert.AreEqual(firstReached.Y + 24, raisedPosition.Y, 0.001);
+        var secondTarget = raisedPosition;
+        secondTarget.X -= 50.8;
+        _robotArmViewModel.MousePoint = secondTarget;
+        _robotArmViewModel.RunInverseKinematics(_robotArmViewModel.Precision, null!);
+        var secondReached = _robotArmViewModel.EffectorSegment.PointB;
+
+        Assert.IsTrue(secondReached.X < firstReached.X - 40,
+            $"Expected the second retract to move materially from X={firstReached.X}, but it reached X={secondReached.X}.");
+        Assert.AreEqual(24, _robotArmViewModel.ArmHeightPosition, 0.001);
+    }
+
+    [TestMethod]
+    public async Task PlayRecording_EmitsMultipleAnimationFrames()
+    {
+        var frameCount = 0;
+        _robotArmViewModel.Refresh += (_, args) =>
+        {
+            if (args is RefreshDrawingEventArgs { Point: not null })
+            {
+                frameCount++;
+            }
+        };
+        _robotArmViewModel.RecordedMetaPoints.Add(new MetaPoint(
+            new System.Windows.Point(500, 0),
+            1,
+            JointsLocks.None,
+            0,
+            0,
+            0,
+            0,
+            0,
+            new System.Windows.Point(500, 0)));
+        _robotArmViewModel.RecordedMetaPoints.Add(new MetaPoint(
+            new System.Windows.Point(520, 0),
+            1,
+            JointsLocks.None,
+            10,
+            20,
+            30,
+            0,
+            0,
+            new System.Windows.Point(520, 0)));
+
+        _robotArmViewModel.PlayCommand.Execute(null);
+        await _robotArmViewModel.PlayCommand.ExecutionTask!;
+
+        Assert.IsTrue(frameCount > 1, $"Expected multiple animation frames, but received {frameCount}.");
+        Assert.IsFalse(_robotArmViewModel.IsPlaying);
     }
 }

@@ -34,13 +34,14 @@ public partial class RobotArmViewModel : ObservableObject
     /// before confirming the deletion of the recording
     /// </summary>
     private const int MinPointsBeforeConfirm = 5;
+    private static readonly TimeSpan PlaybackFrameInterval = TimeSpan.FromMilliseconds(16);
     public static Point DefaultRandomPoint = new Point(920, 395);
     CancellationTokenSource? _tokenSource;
 
     /// <summary>
     /// How many times the Inverse kinematics will try to adjust the robot position towards the mouse
     /// </summary>
-    private const int AdjustIterations = 8;
+    private const int AdjustIterations = 32;
 
     #region Constructors
 
@@ -423,8 +424,9 @@ public partial class RobotArmViewModel : ObservableObject
     /// Redraw the perspective view as soon as the rail carriage moves.
     /// </summary>
     /// <param name="value">The new rail position.</param>
-    partial void OnArmRailPositionChanged(double value)
+    partial void OnArmRailPositionChanged(double oldValue, double newValue)
     {
+        TranslateRobotOrigin(newValue - oldValue, 0);
         GoForwardCommand.NotifyCanExecuteChanged();
         GoBackwardCommand.NotifyCanExecuteChanged();
         Refresh?.Invoke(this, RefreshDrawingEventArgs.Empty);
@@ -441,11 +443,43 @@ public partial class RobotArmViewModel : ObservableObject
     /// Redraw the perspective view as soon as the mast carriage moves.
     /// </summary>
     /// <param name="value">The new mast height.</param>
-    partial void OnArmHeightPositionChanged(double value)
+    partial void OnArmHeightPositionChanged(double oldValue, double newValue)
     {
+        TranslateRobotOrigin(0, newValue - oldValue);
         GoUpCommand.NotifyCanExecuteChanged();
         GoDownCommand.NotifyCanExecuteChanged();
         Refresh?.Invoke(this, RefreshDrawingEventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Keeps the articulated chain and its command target attached to the rail/mast
+    /// carriage. Position properties previously moved only the rendered carriage,
+    /// leaving the IK origin and the next relative target at their old coordinates.
+    /// </summary>
+    private void TranslateRobotOrigin(double deltaX, double deltaY)
+    {
+        if (deltaX == 0 && deltaY == 0)
+        {
+            return;
+        }
+
+        var delta = new Vector(deltaX, deltaY);
+        RobotArmOriginPosition += delta;
+
+        // These fields are assigned after the position properties in some constructors.
+        if (_upperArmSegment is null || _forearmSegment is null || _effectorSegment is null)
+        {
+            return;
+        }
+
+        _upperArmSegment.PointA += delta;
+        _upperArmSegment.Update();
+        _forearmSegment.PointA = _upperArmSegment.PointB;
+        _forearmSegment.Update();
+        _effectorSegment.PointA = _forearmSegment.PointB;
+        _effectorSegment.Update();
+        MousePoint += delta;
+        LastSurfacePoint += delta;
     }
 
     /// <summary>
@@ -679,7 +713,7 @@ public partial class RobotArmViewModel : ObservableObject
             // let's move the end effector as close as possible between the two points
             // then calculate the angles to get there
             // THE MAIN CHALLENGE HERE IS WHEN THE EFFECTOR HAS TO MOVE IN A CIRCLE around a point
-            if (RecordedMetaPoints.Points[i].JointsLocks.HasFlag(JointsLocks.None))
+            if (RecordedMetaPoints.Points[i].JointsLocks == JointsLocks.None)
             {
                 // no joint is locked, we will try to follow the straight line between 2 recorded points by calculating
                 // the closest kinematic point to the point on the line 
@@ -725,46 +759,37 @@ public partial class RobotArmViewModel : ObservableObject
             //Debug.WriteLine($"Last shoulder: {lastPoint.ShoulderAngle} elbow: {lastPoint.ElbowAngle} wrist: {lastPoint.WristAngle}");                                                                                                                                                                                                                                                                                                                                             
         }
 
+        _tokenSource?.Dispose();
         _tokenSource = new CancellationTokenSource();
         CancellationToken ct = _tokenSource.Token;
-        using (var armPositionTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(5)))
+        try
         {
-            try
+            while (_playbackIndex < playbackPoints.Count && IsPlaying)
             {
-                // Play the points
-                // TODO: Add Cancelation Token
-                while (await armPositionTimer.WaitForNextTickAsync(ct))
-                {
-                    if (_playbackIndex >= playbackPoints.Count || IsPlaying == false)
-                    {
-                        _tokenSource.Cancel();
-                        break;
-                    }
+                var point = playbackPoints[_playbackIndex];
+                MousePoint = point.MousePoint;
+                IsWristLocked = point.JointsLocks.HasFlag(JointsLocks.Wrist);
+                IsElbowLocked = point.JointsLocks.HasFlag(JointsLocks.Elbow);
+                IsShoulderLocked = point.JointsLocks.HasFlag(JointsLocks.Shoulder);
+                IsEffectorLocked = point.JointsLocks.HasFlag(JointsLocks.EffectorGrip);
 
-                    MousePoint = playbackPoints[_playbackIndex].MousePoint;
-                    IsWristLocked = playbackPoints[_playbackIndex].JointsLocks.HasFlag(JointsLocks.Wrist);
-                    IsElbowLocked = playbackPoints[_playbackIndex].JointsLocks.HasFlag(JointsLocks.Elbow);
-                    IsShoulderLocked = playbackPoints[_playbackIndex].JointsLocks.HasFlag(JointsLocks.Shoulder);
-                    IsEffectorLocked = playbackPoints[_playbackIndex].JointsLocks.HasFlag(JointsLocks.EffectorGrip);
+                _activePoint = point;
+                Debug.WriteLine($"[{point.Speed}] -- Shoulder: {point.ShoulderAngle} elbow: {point.ElbowAngle} wrist: {point.WristAngle}");
+                _playbackIndex++;
+                Refresh?.Invoke(this, new RefreshDrawingEventArgs(point));
 
-                    // When playing draw the active point
-                    _activePoint = playbackPoints[_playbackIndex];
-                    Debug.WriteLine($"[{playbackPoints[_playbackIndex].Speed}] -- Shoulder: {playbackPoints[_playbackIndex].ShoulderAngle} elbow: {playbackPoints[_playbackIndex].ElbowAngle} wrist: {playbackPoints[_playbackIndex].WristAngle}");
-
-                    _playbackIndex++;
-
-                    Refresh?.Invoke(this, new RefreshDrawingEventArgs(_activePoint));
-                }
+                // Leave the UI dispatcher idle long enough for WPF to render this frame.
+                await Task.Delay(PlaybackFrameInterval, ct);
             }
-            catch (TaskCanceledException)
-            {
-                Debug.WriteLine("Playback Canceled");
-            }
-            finally
-            {
-                IsPlaying = false;
-                _playbackIndex = 0;
-            }
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            Debug.WriteLine("Playback Canceled");
+        }
+        finally
+        {
+            IsPlaying = false;
+            _playbackIndex = 0;
         }
     }
 
