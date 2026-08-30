@@ -10,6 +10,10 @@ namespace KinematicsDemo.Views;
 internal sealed class RobotPerspectiveRenderer
 {
     private const float ArmBaseOffsetX = 125;
+    // A sub-1 viewport multiplier gives the scene a wider, more visibly
+    // perspective lens than the previous 1.15 telephoto-like view.
+    private const float FocalLengthMultiplier = .82f;
+    private static readonly Vector3 LightDirection = Vector3.Normalize(new Vector3(-.45f, -.65f, 1f));
 
     private Vector3 camera, forward, right, up;
     private float focal, cx, cy;
@@ -106,7 +110,7 @@ internal sealed class RobotPerspectiveRenderer
         forward = Vector3.Normalize(target - camera);
         right = Vector3.Normalize(Vector3.Cross(forward, Vector3.UnitZ));
         up = Vector3.Normalize(Vector3.Cross(right, forward));
-        focal = Math.Min(width, height) * 1.15f;
+        focal = Math.Min(width, height) * FocalLengthMultiplier;
         cx = width * .43f;
         cy = height * .54f;
     }
@@ -128,10 +132,81 @@ internal sealed class RobotPerspectiveRenderer
         Vector3 h = size / 2;
         Vector3[] v = { center+new Vector3(-h.X,-h.Y,-h.Z),center+new Vector3(h.X,-h.Y,-h.Z),center+new Vector3(h.X,h.Y,-h.Z),center+new Vector3(-h.X,h.Y,-h.Z),center+new Vector3(-h.X,-h.Y,h.Z),center+new Vector3(h.X,-h.Y,h.Z),center+new Vector3(h.X,h.Y,h.Z),center+new Vector3(-h.X,h.Y,h.Z) };
         int[][] faces = { new[]{0,1,2,3},new[]{0,4,5,1},new[]{1,5,6,2},new[]{2,6,7,3},new[]{3,7,4,0},new[]{4,7,6,5} };
-        foreach (var f in faces) { using var path = new SKPath(); SKPoint p = Project(v[f[0]], out _); path.MoveTo(p); for(int n=1;n<4;n++){p=Project(v[f[n]],out _);path.LineTo(p);} path.Close(); using var fill=new SKPaint{Color=color,IsAntialias=true}; using var edge=new SKPaint{Color=new(48,58,64,130),Style=SKPaintStyle.Stroke,StrokeWidth=1,IsAntialias=true}; c.DrawPath(path,fill);c.DrawPath(path,edge); }
+        Solid(c, v, faces, color);
     }
 
-    private void Link(SKCanvas c, Vector3 a, Vector3 b, float width, SKColor color) { SKPoint p1=Project(a,out float d1),p2=Project(b,out float d2); float w=width*focal/Math.Max(1,(d1+d2)/2); using var shadow=Paint(new(30,36,40,80),w+7);c.DrawLine(p1.X+4,p1.Y+6,p2.X+4,p2.Y+6,shadow);using var body=Paint(color,w);c.DrawLine(p1,p2,body); }
+    private void Solid(SKCanvas c, Vector3[] v, int[][] faces, SKColor color)
+    {
+        Array.Sort(faces, (a, b) => FaceDepth(v, b).CompareTo(FaceDepth(v, a)));
+        foreach (var f in faces)
+        {
+            // Face indices use clockwise winding when seen from outside.
+            Vector3 normal = -Vector3.Normalize(Vector3.Cross(v[f[1]] - v[f[0]], v[f[2]] - v[f[0]]));
+            Vector3 faceCenter = (v[f[0]] + v[f[1]] + v[f[2]] + v[f[3]]) / 4;
+            if (Vector3.Dot(normal, camera - faceCenter) <= 0) continue;
+
+            float illumination = .55f + .45f * Math.Max(0, Vector3.Dot(normal, LightDirection));
+            using var path = new SKPath();
+            SKPoint p = Project(v[f[0]], out _);
+            path.MoveTo(p);
+            for (int n = 1; n < 4; n++) { p = Project(v[f[n]], out _); path.LineTo(p); }
+            path.Close();
+            using var fill = new SKPaint { Color = Shade(color, illumination), IsAntialias = true };
+            using var edge = new SKPaint { Color = new(38, 47, 53, 105), Style = SKPaintStyle.Stroke, StrokeWidth = 1, IsAntialias = true };
+            c.DrawPath(path, fill);
+            c.DrawPath(path, edge);
+        }
+    }
+
+    private float FaceDepth(Vector3[] vertices, int[] face)
+    {
+        Vector3 center = (vertices[face[0]] + vertices[face[1]] + vertices[face[2]] + vertices[face[3]]) / 4;
+        return Vector3.Dot(center - camera, forward);
+    }
+
+    private static SKColor Shade(SKColor color, float amount) => new(
+        (byte)Math.Clamp(color.Red * amount, 0, 255),
+        (byte)Math.Clamp(color.Green * amount, 0, 255),
+        (byte)Math.Clamp(color.Blue * amount, 0, 255),
+        color.Alpha);
+
+    private void Link(SKCanvas c, Vector3 a, Vector3 b, float width, SKColor color)
+    {
+        Vector3 axis = b - a;
+        Vector3 side = Vector3.Cross(Vector3.UnitZ, Vector3.Normalize(axis));
+        if (side.LengthSquared() < .0001f)
+        {
+            side = Vector3.UnitY;
+        }
+        else
+        {
+            side = Vector3.Normalize(side);
+        }
+
+        Vector3 across = side * (width / 2);
+        Vector3 vertical = Vector3.UnitZ * (width * .22f);
+        Vector3[] vertices =
+        {
+            a - across - vertical,
+            b - across - vertical,
+            b + across - vertical,
+            a + across - vertical,
+            a - across + vertical,
+            b - across + vertical,
+            b + across + vertical,
+            a + across + vertical,
+        };
+        int[][] faces =
+        {
+            new[] { 0, 1, 2, 3 },
+            new[] { 0, 4, 5, 1 },
+            new[] { 1, 5, 6, 2 },
+            new[] { 2, 6, 7, 3 },
+            new[] { 3, 7, 4, 0 },
+            new[] { 4, 7, 6, 5 },
+        };
+        Solid(c, vertices, faces, color);
+    }
     private void Joint(SKCanvas c, Vector3 v, float radius)
     {
         SKPoint p = Project(v, out float d);
