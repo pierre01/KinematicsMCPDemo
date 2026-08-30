@@ -235,6 +235,22 @@ internal sealed class RobotPerspectiveRenderer
         c.DrawCircle(p, r, fill);
         c.DrawCircle(p, r, rim);
     }
-    private void Gripper(SKCanvas c, Vector3 wrist, Vector3 grip, bool closed) { Vector3 d=Vector3.Normalize(grip-wrist),side=Vector3.Normalize(Vector3.Cross(d,Vector3.UnitZ));float s=closed?14:31;using var p=Paint(new(45,54,59),5);Line(c,grip-side*s,grip+side*s,p);Line(c,grip-side*s,grip-side*s+d*38,p);Line(c,grip+side*s,grip+side*s+d*38,p); }
+    private void Gripper(SKCanvas c, Vector3 wrist, Vector3 grip, bool closed)
+    {
+        Vector3 direction = Vector3.Normalize(grip - wrist);
+        Vector3 side = Vector3.Normalize(Vector3.Cross(direction, Vector3.UnitZ));
+        float jawOffset = closed ? 9 : 28;
+        Vector3 jawBase = grip + (direction * 8);
+        Vector3 jawTipOffset = direction * 38;
+
+        using var palm = Paint(new(45, 54, 59), 7);
+        using var jaw = Paint(new(45, 54, 59), 5);
+
+        // The palm remains rigidly anchored to the kinematic endpoint. Only the
+        // two jaws translate sideways, symmetrically, when gripping.
+        Line(c, grip - (side * 34), grip + (side * 34), palm);
+        Line(c, jawBase - (side * jawOffset), jawBase - (side * jawOffset) + jawTipOffset, jaw);
+        Line(c, jawBase + (side * jawOffset), jawBase + (side * jawOffset) + jawTipOffset, jaw);
+    }
     private void Target(SKCanvas c, Vector3 v) { SKPoint p=Project(v,out _);using var q=new SKPaint{Color=new(239,81,63),StrokeWidth=2.5f,Style=SKPaintStyle.Stroke,IsAntialias=true};c.DrawCircle(p,8,q);c.DrawLine(p.X-12,p.Y,p.X+12,p.Y,q);c.DrawLine(p.X,p.Y-12,p.X,p.Y+12,q); }
 }
