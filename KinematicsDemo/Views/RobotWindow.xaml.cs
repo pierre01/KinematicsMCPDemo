@@ -65,6 +65,12 @@ public partial class RobotWindow : Window
         Robot3DSurface.InvalidateVisual();
     }
 
+    private void FocalLengthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        _perspectiveRenderer.FocalLength = (float)e.NewValue;
+        Robot3DSurface?.InvalidateVisual();
+    }
+
     private void DrawSegments(object sender, SkiaSharp.Views.Desktop.SKPaintSurfaceEventArgs e)
     {
         var precision =_robotViewModel.Precision; // in mm

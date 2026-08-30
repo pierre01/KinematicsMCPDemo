@@ -10,13 +10,13 @@ namespace KinematicsDemo.Views;
 internal sealed class RobotPerspectiveRenderer
 {
     private const float ArmBaseOffsetX = 125;
-    // A sub-1 viewport multiplier gives the scene a wider, more visibly
-    // perspective lens than the previous 1.15 telephoto-like view.
-    private const float FocalLengthMultiplier = .82f;
+    private const float DefaultFocalLength = .82f;
     private static readonly Vector3 LightDirection = Vector3.Normalize(new Vector3(-.45f, -.65f, 1f));
 
     private Vector3 camera, forward, right, up;
     private float focal, cx, cy;
+
+    public float FocalLength { get; set; } = DefaultFocalLength;
 
     public void Draw(SKCanvas c, SKImageInfo info, RobotArmViewModel vm)
     {
@@ -106,13 +106,18 @@ internal sealed class RobotPerspectiveRenderer
         float span = (float)Math.Max(850, vm.RailPositionRange?.ZeroMax ?? 1000);
         float center = (float)((vm.RailPositionRange?.Min + vm.RailPositionRange?.Max) / 2 ?? 0);
         Vector3 target = new(center, 0, 270);
-        camera = target + new Vector3(span * .95f, -span * 1.25f, span * .78f);
+        // Dolly the camera along with focal-length changes. This preserves useful
+        // subject framing while still allowing shorter lenses to produce stronger
+        // near/far perspective. The minimum avoids entering the robot at 0.2.
+        float focalRatio = Math.Max(.45f, Math.Clamp(FocalLength, .2f, 1.5f) / DefaultFocalLength);
+        float framingDistance = span * .76f * focalRatio;
+        camera = target + new Vector3(framingDistance * .95f, -framingDistance * 1.25f, framingDistance * .78f);
         forward = Vector3.Normalize(target - camera);
         right = Vector3.Normalize(Vector3.Cross(forward, Vector3.UnitZ));
         up = Vector3.Normalize(Vector3.Cross(right, forward));
-        focal = Math.Min(width, height) * FocalLengthMultiplier;
-        cx = width * .43f;
-        cy = height * .54f;
+        focal = Math.Min(width, height) * Math.Clamp(FocalLength, .2f, 1.5f);
+        cx = width * .5f;
+        cy = height * .45f;
     }
 
     private static Vector3 World(Point p, Point o, float bx, float z) => new(bx + ArmBaseOffsetX + (float)(p.X - o.X), -(float)(p.Y - o.Y), z);

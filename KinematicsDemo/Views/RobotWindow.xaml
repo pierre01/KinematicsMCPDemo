@@ -287,6 +287,27 @@
             BorderThickness="1,1,1,1"
             CornerRadius="8,8,8,8">
             <StackPanel Width="299" Orientation="Vertical">
+                <Border Margin="8,8,8,4" Padding="8" Background="#FFF5F8FA"
+                        BorderBrush="#FFD5DEE3" BorderThickness="1" CornerRadius="4">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,5">
+                            <TextBlock VerticalAlignment="Center" Text="Perspective focal length" />
+                            <TextBlock Margin="8,0,0,0" HorizontalAlignment="Right"
+                                       FontWeight="SemiBold"
+                                       Text="{Binding ElementName=FocalLengthSlider, Path=Value, StringFormat={}{0:F2}}" />
+                        </DockPanel>
+                        <Slider x:Name="FocalLengthSlider"
+                                Minimum="0.2" Maximum="1.5" Value="0.82"
+                                SmallChange="0.05" LargeChange="0.1"
+                                TickFrequency="0.1" IsSnapToTickEnabled="False"
+                                ValueChanged="FocalLengthSlider_ValueChanged" />
+                        <Grid Margin="0,2,0,0">
+                            <TextBlock HorizontalAlignment="Left" FontSize="11" Foreground="#FF657780" Text="Wide  0.2" />
+                            <TextBlock HorizontalAlignment="Center" FontSize="11" Foreground="#FF657780" Text="Neutral  1.0" />
+                            <TextBlock HorizontalAlignment="Right" FontSize="11" Foreground="#FF657780" Text="Narrow  1.5" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
                 <StackPanel Margin="8" Orientation="Horizontal">
                     <TextBlock
                         Width="72"
