@@ -1,5 +1,6 @@
 ﻿# KinematicsDemo + MCP Server - With MAUI Client
 Demo of a **WPF** app showing articulated jointed segments in a kinematic chain.
+The robot is controlled by an AI of your choice over MCP using tool calling 
 ## The robot we are trying to simulate is a scara robot like the Brooks PF400 (TM) robot
 The robot has 3 joints. The first joint is fixed to the origin*, the second joint is fixed to the end of the first segment 
 and the third joint is fixed to the second segment. The end effector is the point of grasp
@@ -51,5 +52,5 @@ The teach pendant UI also allows the user to record the position. The user can a
 3. fix glitches in the UI related to the Kinematic chain not always reproducing the recorded points correctly
 4. Add Robot configurations for different configurations (rail, height, etc..) passed as parameters
 5. Add a service to control the robot over a mobile device 
-6. Use Microsoft Semantic Kernel to control the robot with LLM mappings form text or voice commands into Service commands
+6. 
 
