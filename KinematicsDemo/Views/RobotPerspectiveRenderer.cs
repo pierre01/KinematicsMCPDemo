@@ -61,8 +61,17 @@ internal sealed class RobotPerspectiveRenderer
         using var font = new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold), 15);
         using var text = new SKPaint { Color = new(52, 64, 72), IsAntialias = true };
         c.DrawText("PERSPECTIVE ROBOT VIEW", 22, 32, SKTextAlign.Left, font, text);
-        using var small = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), 13);
-        c.DrawText($"Rail {vm.ArmRailPosition:0.0} mm     Height {vm.ArmHeightPosition:0.0} mm", 22, 55, SKTextAlign.Left, small, text);
+        using var small = new SKFont(SKTypeface.FromFamilyName("Segoe UI"), 12);
+        double reach = vm.UpperArmSegment.Length + vm.ForearmSegment.Length + vm.EffectorSegment.Length;
+        c.DrawText(
+            $"3-axis arm  |  Reach {reach:0} mm  |  Links {vm.UpperArmSegment.Length:0} / {vm.ForearmSegment.Length:0} / {vm.EffectorSegment.Length:0} mm",
+            22, 53, SKTextAlign.Left, small, text);
+        c.DrawText(
+            $"Rail travel {vm.RailPositionRange?.ZeroMax ?? 0:0} mm  |  Mast travel {vm.MastPositionRange.ZeroMax:0} mm",
+            22, 71, SKTextAlign.Left, small, text);
+        c.DrawText(
+            $"Position  Rail {vm.ArmRailPosition:0.0} mm  |  Height {vm.ArmHeightPosition:0.0} mm",
+            22, 89, SKTextAlign.Left, small, text);
         c.DrawText("Click the arm plane to set the target", 22, info.Height - 22, SKTextAlign.Left, small, text);
     }
 

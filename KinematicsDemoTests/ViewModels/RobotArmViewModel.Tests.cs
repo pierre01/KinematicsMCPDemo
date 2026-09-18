@@ -145,10 +145,15 @@ public class RobotArmViewModelTests
     public void GoForward_IncreasesRailPosition()
     {
         var initialPosition = _robotArmViewModel.ArmRailPosition;
+        var initialEffector = _robotArmViewModel.EffectorSegment.PointB;
+        _robotArmViewModel.IsMousePointInRobotCoordinates = false;
 
         _robotArmViewModel.GoForwardCommand.Execute(25d);
 
         Assert.AreEqual(initialPosition + 25d, _robotArmViewModel.ArmRailPosition);
+        Assert.AreEqual(initialEffector.X + 25d, _robotArmViewModel.EffectorSegment.PointB.X, 0.001);
+        Assert.AreEqual(initialEffector.Y, _robotArmViewModel.EffectorSegment.PointB.Y, 0.001);
+        Assert.IsTrue(_robotArmViewModel.IsMousePointInRobotCoordinates);
         Assert.IsTrue(_refreshed);
     }
 
@@ -167,9 +172,14 @@ public class RobotArmViewModelTests
     public void GoUpAndDown_UsePositiveMagnitude()
     {
         var initialPosition = _robotArmViewModel.ArmHeightPosition;
+        var initialEffector = _robotArmViewModel.EffectorSegment.PointB;
+        _robotArmViewModel.IsMousePointInRobotCoordinates = false;
 
         _robotArmViewModel.GoUpCommand.Execute(25d);
         Assert.AreEqual(initialPosition + 25d, _robotArmViewModel.ArmHeightPosition);
+        Assert.AreEqual(initialEffector.X, _robotArmViewModel.EffectorSegment.PointB.X, 0.001);
+        Assert.AreEqual(initialEffector.Y + 25d, _robotArmViewModel.EffectorSegment.PointB.Y, 0.001);
+        Assert.IsTrue(_robotArmViewModel.IsMousePointInRobotCoordinates);
         Assert.IsTrue(_refreshed);
 
         _refreshed = false;

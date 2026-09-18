@@ -18,7 +18,7 @@ public sealed class SemanticKernelService : ISemanticKernelService, IAsyncDispos
     private const int MaxResponseTokens = 256;
     private const int HistoryTargetCount = 12;
     private const string RemoteModel = "gpt-5-mini";
-    private const string LocalModel = "qwen/qwen3.6-35b-a3b";
+    private const string LocalModel = "qwen/qwen3.8-27b";
     private const string Instructions =
         "Control the robot by calling the matching tool immediately. " +
         "Use millimeters, treat movement commands as relative deltas, and trust the tool result as the new absolute position. " +
@@ -291,7 +291,7 @@ public sealed class QwenReasoningNoneHandler : DelegatingHandler
                 // LM Studio maps the OpenAI-compatible "none" value to Qwen's
                 // model-specific "off" setting. Qwen 3.6 supports on/off rather
                 // than the low/medium/xhigh levels exposed by newer models.
-                body["reasoning_effort"] = "none";
+                //body["reasoning_effort"] = "none";
                 request.Content = new StringContent(body.ToJsonString(), Encoding.UTF8, "application/json");
             }
         }

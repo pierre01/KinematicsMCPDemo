@@ -480,6 +480,11 @@ public partial class RobotArmViewModel : ObservableObject
         _effectorSegment.Update();
         MousePoint += delta;
         LastSurfacePoint += delta;
+
+        // This target was changed in the robot plane, not by a screen pointer.
+        // Without this marker the next paint converts it from screen coordinates
+        // again, subtracting the canvas offset and causing cumulative drift.
+        IsMousePointInRobotCoordinates = true;
     }
 
     /// <summary>
