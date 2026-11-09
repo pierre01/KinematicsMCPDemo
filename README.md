@@ -52,5 +52,9 @@ The teach pendant UI also allows the user to record the position. The user can a
 3. fix glitches in the UI related to the Kinematic chain not always reproducing the recorded points correctly
 4. Add Robot configurations for different configurations (rail, height, etc..) passed as parameters
 5. Add a service to control the robot over a mobile device 
-6. 
+
+# Using Local AI
+Here are an inference parameter example for a local AI model that can be used to control the robot over MCP. The model is a simple feedforward neural network that takes as input the current state of the robot and the target point and outputs the angles of the joints to reach the target point. The model is trained on a dataset of random points in space and the corresponding joint angles to reach those points. The model is then used to control the robot in real-time over MCP.
+## Inference parameters using:  LM Studio -- qwen3.8-27b
+![image](KinematicsDemo/ReadMeImages/Qwen38Params.png)
 
