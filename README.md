@@ -12,6 +12,14 @@ The robot can move on the Z AXis by moving up and down a mast, whilst moving the
 ## Solution structure
 * **WPF** Application for the Robot UI and MCP Server
 * **MAUI** Application for the mobile client to connect to the MCP server and control the robot remotely
+## Build requirements
+* .NET 11 SDK with the .NET MAUI 11 workloads
+* Windows for the WPF application and Windows MAUI target; a Mac with Xcode for Apple platform packaging
+* Android 7.0 (API 24) or later for the Android client
+
+Build the solution with `dotnet build KinematicsDemo.slnx`.
+Run the tests with `dotnet test KinematicsDemoTests/KinematicsDemoTests.csproj`.
+
 ## Technologies used
 * **WPF** for the UI
 * SkiaSharp for the overlay kinematic graphics

@@ -160,11 +160,17 @@ internal sealed class RobotPerspectiveRenderer
             if (Vector3.Dot(normal, camera - faceCenter) <= 0) continue;
 
             float illumination = .55f + .45f * Math.Max(0, Vector3.Dot(normal, LightDirection));
-            using var path = new SKPath();
+            using var pathBuilder = new SKPathBuilder();
             SKPoint p = Project(v[f[0]], out _);
-            path.MoveTo(p);
-            for (int n = 1; n < 4; n++) { p = Project(v[f[n]], out _); path.LineTo(p); }
-            path.Close();
+            pathBuilder.MoveTo(p);
+            for (int n = 1; n < 4; n++)
+            {
+                p = Project(v[f[n]], out _);
+                pathBuilder.LineTo(p);
+            }
+
+            pathBuilder.Close();
+            using var path = pathBuilder.Detach();
             using var fill = new SKPaint { Color = Shade(color, illumination), IsAntialias = true };
             using var edge = new SKPaint { Color = new(38, 47, 53, 105), Style = SKPaintStyle.Stroke, StrokeWidth = 1, IsAntialias = true };
             c.DrawPath(path, fill);
